@@ -75,11 +75,42 @@ function exportBackup(){const blob=new Blob([JSON.stringify({version:2,exportedA
 document.getElementById('date').value=today();document.getElementById('weightDate').value=today();const dow=new Date().getDay();document.getElementById('day').value=({1:'A',2:'B',4:'C',5:'D'})[dow]||'A';renderExercises();tab('train');
 </script>
 <script type="module">
+import {buildHistoryExport,downloadHistoryExport} from './history-export.mjs';
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-import {getFirestore,doc,getDoc,setDoc,onSnapshot,runTransaction} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import {getFirestore,doc,getDoc,getDocFromServer,setDoc,onSnapshot,runTransaction} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 const firebaseConfig={apiKey:'AIzaSyDNdocgFECnnTv3T6wmvLmpO3LgI3ZSY1k',authDomain:'meu-treino-583da.firebaseapp.com',projectId:'meu-treino-583da',storageBucket:'meu-treino-583da.firebasestorage.app',messagingSenderId:'296425556675',appId:'1:296425556675:web:be139ec2e8eed513eab076'};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),firestore=getFirestore(app);
+const exportSection=document.createElement('section');
+exportSection.innerHTML='<h2>Analisar no ChatGPT</h2><p class="note">Exporte o histórico salvo na nuvem da sua conta Google: treinos, exercícios, cargas, repetições, cardio e pesos. Aguarde a sincronização dos registros recentes antes de exportar. É necessário entrar e estar conectado à internet.</p><button id="exportChatGPT" class="primary wide" disabled>⬇ Exportar histórico para ChatGPT</button><p id="exportStatus" class="note" role="status" aria-live="polite"></p><p class="note">O arquivo inclui suas observações. Revise o JSON e anexe-o manualmente ao ChatGPT quando desejar compartilhar. Nenhum envio ao ChatGPT é feito pelo aplicativo.</p>';
+document.getElementById('backup').appendChild(exportSection);
+const exportButton=document.getElementById('exportChatGPT');
+const exportStatus=document.getElementById('exportStatus');
+let exportBusy=false;
+onAuthStateChanged(auth,()=>{exportButton.disabled=exportBusy||!auth.currentUser;exportStatus.textContent=auth.currentUser?'':'Entre com Google para exportar seu histórico da nuvem.'});
+exportButton.onclick=async()=>{
+  if(exportBusy)return;
+  const user=auth.currentUser;
+  if(!user){exportStatus.textContent='Entre com Google para exportar seu histórico da nuvem.';return}
+  exportBusy=true;
+  exportButton.disabled=true;
+  exportStatus.textContent='Lendo seu histórico da nuvem...';
+  try{
+    const snapshot=await getDocFromServer(doc(firestore,'usuarios',user.uid,'dados','principal'));
+    if(auth.currentUser!==user)throw Error('A conta mudou durante a exportação. Tente novamente.');
+    if(!snapshot.exists())throw Error('Nenhum histórico encontrado na nuvem desta conta.');
+    if(snapshot.metadata.fromCache||snapshot.metadata.hasPendingWrites)throw Error('Aguarde a sincronização e tente novamente.');
+    const payload=buildHistoryExport(snapshot.data());
+    downloadHistoryExport(payload);
+    exportStatus.textContent=`Arquivo gerado: ${payload.workouts.length} treino(s) e ${payload.weights.length} peso(s). Revise o JSON e anexe-o ao ChatGPT.`;
+  }catch(error){
+    const messages={'permission-denied':'Sua conta não tem permissão para ler este histórico. Verifique o acesso existente no Firebase.','unavailable':'Não foi possível acessar a nuvem. Verifique a internet e tente novamente.','unauthenticated':'Entre novamente com Google para exportar.'};
+    exportStatus.textContent=messages[error.code]||(error.code?'Não foi possível exportar. Tente novamente.':error.message);
+  }finally{
+    exportBusy=false;
+    exportButton.disabled=!auth.currentUser;
+  }
+};
 let currentUser=null,unsub=null,writing=false,pending=false,initializing=false,saveTimer=null;
 const status=document.getElementById('syncStatus');
 const copyDb=()=>({workouts:JSON.parse(JSON.stringify(db.workouts)),weights:JSON.parse(JSON.stringify(db.weights))});
