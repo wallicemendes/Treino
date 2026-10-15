@@ -1,4 +1,33 @@
-# Meu Treino — exportação para ChatGPT
+# Meu Treino — análise local e exportação para ChatGPT
+
+## Analisar meu treino no aplicativo
+
+Entre com Google, aguarde a sincronização e abra **Relatórios → Analisar meu treino**. O botão lê somente `usuarios/{auth.currentUser.uid}/dados/principal` no Firebase já integrado (`meu-treino-583da`). Requer internet para buscar uma versão confirmada no servidor. O cálculo é local, determinístico e gratuito, sem API ou envio a serviços de IA. Nenhuma escrita, restauração, alteração de regras ou autenticação é feita pela análise. Registros locais ainda não sincronizados não entram no resultado.
+
+- Frequência: quatro semanas de calendário, de segunda a domingo, incluindo a semana atual incompleta. Treinos salvos e dias distintos são contados separadamente. Um registro precisa ter exercício com `done === true` ou cardio positivo; exercícios somente planejados não contam como realizados.
+- Séries: `sets` é o número planejado e `done` marca o exercício inteiro. A análise mostra separadamente séries planejadas e séries com repetições numéricas informadas nos exercícios feitos. `12,12,10` informa três séries; `12` informa uma. O modelo atual não comprova a conclusão de cada série. Duração, exercícios combinados e texto ambíguo não são convertidos em repetições.
+- Evolução: compara os últimos registros em duas datas distintas para cada nome exato de exercício. A variação de carga usa kg por exercício, não por lado. Repetições só são comparadas com carga, meta e número de séries equivalentes. Mudanças de máquina, técnica ou esforço não podem ser inferidas. A sugestão condicional de pequeno incremento exige atingir o topo da mesma meta em todas as séries, em duas datas na mesma carga.
+- Cardio: minutos, conforme o campo de registro e o código existente; não há inferência de distância ou intensidade. Zero explícito difere de campo vazio.
+- Peso: médias diárias, depois médias de duas janelas consecutivas de sete dias, terminando na última pesagem. São necessários pelo menos dois dias medidos em cada janela. Múltiplas medidas na mesma data são primeiro agrupadas pela média. Pesagens com mais de 14 dias são sinalizadas; variação não é interpretada como gordura ou músculo.
+
+Datas inválidas/futuras e registros malformados são desconsiderados com aviso; campos vazios não viram zero. Histórico vazio, ausência de documento, falta de permissão, rede indisponível e sincronização pendente têm mensagens próprias. O resultado é limpo ao iniciar nova análise, sair ou trocar de conta; respostas atrasadas da conta anterior são descartadas. Não há fallback para o histórico compartilhado do `localStorage`.
+
+### Testar e publicar
+
+Use Node.js 22 ou superior:
+
+```sh
+npm test
+npm install
+npx playwright install chromium
+npm run test:browser
+```
+
+O teste de navegador serve os arquivos reais por HTTP, simula Firebase apenas nos cenários autenticados e testa também os SDKs reais em sessão sem login. Pode usar `BROWSER_EXECUTABLE` para um Chromium/Edge instalado, `PLAYWRIGHT_MODULE` para uma instalação externa de Playwright e `SCREENSHOT_DIR` para salvar a captura móvel. Não use dados pessoais nos testes.
+
+Em 15/10/2026 passaram 15 testes automatizados de cálculo/regressão e 42 verificações de navegador no Edge, nas larguras 320, 390, 430 e 1280 px. Foram verificados erro/retry, leitura restrita ao UID, ausência de escritas da análise, snapshots não confirmados, troca/saída de conta durante a leitura, limpeza de resultado, nomes de exercícios como texto, ausência de transbordamento horizontal e preservação das abas. A captura móvel foi inspecionada. Trata-se de emulação de viewport móvel; não foi testado em um iPhone físico nem com dados privados de uma conta real.
+
+Para publicar, mantenha `index.html`, `history-export.mjs`, `training-analysis.mjs` e `analysis-controller.mjs` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os quatro arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. Esses passos não exigem alterar regras ou configurações do Firebase.
 
 ## Como usar
 
