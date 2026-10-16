@@ -45,6 +45,30 @@ test('cardio has minutes, missing is distinct from explicit zero and cardio-only
   assert.equal(result.sessions, 3);
 });
 
+test('structured cardio supports multiple activities and treadmill details', () => {
+  const result = analyze([workout('2026-10-12', {cardio: undefined, exercises: [], cardioActivities: [
+    {type: 'Esteira', minutes: 20, speed: 5.5, incline: 2},
+    {type: 'Bicicleta', minutes: 15},
+    {type: 'Escada', minutes: 10}
+  ]})]);
+  assert.equal(result.sessions, 1);
+  assert.equal(result.cardioMinutes, 45);
+  assert.deepEqual(result.cardioByType.map(item => [item.type, item.minutes]), [['Esteira', 20], ['Bicicleta', 15], ['Escada', 10]]);
+  const payload = buildHistoryExport({workouts: [workout('2026-10-12', {cardioActivities: [
+    {type: 'Esteira', minutes: 20, speed: 5.5, incline: 2}, {type: 'Bicicleta', minutes: 15}
+  ]})], weights: []});
+  assert.deepEqual(payload.workouts[0].cardioActivities, [
+    {type: 'Esteira', minutes: 20, speed: 5.5, incline: 2}, {type: 'Bicicleta', minutes: 15}
+  ]);
+});
+
+test('export normalizes legacy cardio without deleting its original value', () => {
+  const payload = buildHistoryExport({workouts: [workout('2026-10-12', {cardio: '25'})], weights: []});
+  assert.equal(payload.workouts[0].cardio, '25');
+  assert.deepEqual(payload.workouts[0].cardioActivities, [{type: 'Cardio (registro legado)', minutes: 25, legacy: true}]);
+  assert.equal(payload.schemaVersion, 2);
+});
+
 test('malformed records, impossible dates and future dates are excluded', () => {
   const result = analyze([null, workout('2026-02-30'), workout('2026-10-16'), workout('2026-10-10', {exercises: null})], [null, {date: '2026-10-10', value: ''}]);
   assert.equal(result.sessions, 0);

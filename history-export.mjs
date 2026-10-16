@@ -1,3 +1,5 @@
+import {normalizeCardioActivities} from './cardio-utils.mjs';
+
 function selectFields(record, fields) {
   if (!record || typeof record !== 'object' || Array.isArray(record)) {
     throw Error('Histórico inválido. Nenhum arquivo foi gerado.');
@@ -26,15 +28,17 @@ export function buildHistoryExport(data) {
     }
     selected.exercises = workout.exercises.map(exercise =>
       selectFields(exercise, ['name', 'sets', 'target', 'done', 'load', 'reps']));
+    selected.cardioActivities = normalizeCardioActivities(workout).map(activity =>
+      selectFields(activity, ['type', 'minutes', 'speed', 'incline', 'legacy']));
     return selected;
   });
   const weights = data.weights.map(weight => selectFields(weight, ['date', 'value']));
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     application: 'Meu Treino',
     exportedAt: new Date().toISOString(),
     source: 'Firestore: histórico da conta autenticada, documento principal',
-    units: {load: 'kg por exercício, não por lado', cardio: 'minutos', weight: 'kg'},
+    units: {load: 'kg por exercício, não por lado', cardio: 'minutos', speed: 'km/h', incline: '%', weight: 'kg'},
     fieldGuide: {
       day: 'Identificador do treino A, B, C ou D',
       sets: 'Séries planejadas',
@@ -42,6 +46,7 @@ export function buildHistoryExport(data) {
       done: 'Indica se o exercício foi realizado',
       load: 'Carga registrada; string vazia significa não informada',
       reps: 'Repetições realizadas, texto original por série; pode incluir duração',
+      cardioActivities: 'Atividades de cardio normalizadas; registros antigos aparecem como Cardio (registro legado)',
       weights: 'Peso corporal: date é a data local registrada e value é o peso em kg',
       notes: 'Observações escritas pelo usuário; podem conter informações pessoais'
     },

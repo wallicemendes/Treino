@@ -1,3 +1,5 @@
+import {hasCardioRecord, normalizeCardioActivities, totalCardioMinutes} from './cardio-utils.mjs';
+
 const DAY = 86400000;
 
 function dateNumber(value) {
@@ -37,16 +39,27 @@ export function analyzeTraining(data, asOf) {
   let plannedSets = 0;
   let cardioMinutes = 0;
   let cardioRecords = 0;
+  const cardioByType = new Map();
   const exercises = new Map();
   const workouts = [];
   for (const workout of data.workouts) {
     const timestamp = dateNumber(workout?.date);
     if (timestamp === null || timestamp > end || !Array.isArray(workout?.exercises)) { ignored++; continue; }
     const completed = workout.exercises.filter(exercise => exercise && exercise.done === true);
-    const cardio = number(workout.cardio, 300);
+    const cardio = totalCardioMinutes(workout);
+    const cardioRecorded = hasCardioRecord(workout);
     if (!completed.length && !(cardio > 0)) continue;
     workouts.push({date: workout.date, timestamp});
-    if (cardio !== null) { cardioMinutes += cardio; cardioRecords++; }
+    if (cardioRecorded) {
+      cardioMinutes += cardio;
+      cardioRecords++;
+      for (const activity of normalizeCardioActivities(workout)) {
+        const current = cardioByType.get(activity.type) || {minutes: 0, activities: 0};
+        current.minutes += activity.minutes;
+        current.activities++;
+        cardioByType.set(activity.type, current);
+      }
+    }
     for (const exercise of completed) {
       completedExercises++;
       const sets = number(exercise.sets, 100);
@@ -113,7 +126,8 @@ export function analyzeTraining(data, asOf) {
     if (end - reference > 14 * DAY) weightSummary += ' Os últimos dados de peso têm mais de 14 dias; registre medidas recentes.';
   }
   return {asOf, sessions: workouts.length, completedExercises, reportedSets, plannedSets,
-    cardioMinutes, cardioRecords, weeks, evolution, weightSummary, ignored};
+    cardioMinutes, cardioRecords, cardioByType: [...cardioByType].map(([type, values]) => ({type, ...values})),
+    weeks, evolution, weightSummary, ignored};
 }
 
 export function renderAnalysis(root, result) {
@@ -134,7 +148,11 @@ export function renderAnalysis(root, result) {
   const list = append(root, 'ul', '');
   for (const week of result.weeks) append(list, 'li', `Semana de ${displayDate(week.start)}: ${week.sessions} treino(s) em ${week.days} dia(s)${week.partial ? ' — semana atual incompleta' : ''}.`);
   append(root, 'h3', 'Cardio');
-  append(root, 'p', result.cardioRecords ? `${format(result.cardioMinutes)} minutos registrados em ${result.cardioRecords} treino(s). Não há dados de intensidade ou distância para avaliá-las.` : 'Dados insuficientes: nenhum valor válido de cardio registrado.');
+  append(root, 'p', result.cardioRecords ? `${format(result.cardioMinutes)} minutos registrados em ${result.cardioRecords} treino(s).` : 'Dados insuficientes: nenhum valor válido de cardio registrado.');
+  if (result.cardioByType.length) {
+    const cardioList = append(root, 'ul', '');
+    for (const cardio of result.cardioByType) append(cardioList, 'li', `${cardio.type}: ${format(cardio.minutes)} min em ${cardio.activities} atividade(s).`);
+  }
   append(root, 'h3', 'Peso corporal');
   append(root, 'p', result.weightSummary);
   append(root, 'h3', 'Evolução por exercício');

@@ -8,7 +8,7 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = fileURLToPath(new URL('../', import.meta.url));
-const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs']);
+const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs', 'cardio-utils.mjs']);
 const server = createServer(async (request, response) => {
   const name = new URL(request.url, 'http://localhost').pathname.slice(1) || 'index.html';
   if (!allowed.has(name)) { response.writeHead(404).end(); return; }
@@ -67,6 +67,39 @@ try {
     });
     await page.goto(url);
     await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+    check(await page.locator('.done:checked').count() === 0, `${width}px: new session starts with every exercise unchecked`);
+    if (width === 390) {
+      await page.locator('.done').first().check();
+      await page.locator('.load').first().fill('25');
+      await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
+      await page.locator('.cardio-minutes').fill('20');
+      await page.locator('.cardio-speed').fill('5.5');
+      await page.locator('.cardio-incline').fill('2');
+      await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
+      await page.locator('.cardio-type').nth(1).selectOption('Bicicleta');
+      await page.locator('.cardio-minutes').nth(1).fill('15');
+      await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
+      await page.locator('.cardio-type').nth(2).selectOption('Escada');
+      await page.locator('.cardio-minutes').nth(2).fill('10');
+      await page.locator('.remove-cardio').nth(2).click();
+      check(await page.locator('.cardio-item').count() === 2, 'multiple cardio entries can be added and removed');
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      check(await page.locator('#draftBanner').isVisible() && await page.locator('.done').first().isChecked(), 'active draft is identified and restored intentionally');
+      check(await page.locator('.cardio-minutes').first().inputValue() === '20', 'cardio draft survives reload');
+      check(await page.locator('.cardio-item').count() === 2, 'multiple cardio entries survive reload');
+      await page.getByRole('button', {name: 'Finalizar e salvar treino', exact: true}).click();
+      check(await page.locator('.done:checked').count() === 0, 'saving starts a clean unchecked session');
+      check(!(await page.locator('#draftBanner').isVisible()), 'saving clears the active draft');
+      await page.getByRole('button', {name: 'Histórico', exact: true}).click();
+      check((await page.locator('#historyList').innerText()).includes('Esteira: 20 min • 5.5 km/h • 2% inclinação'), 'history shows structured treadmill details');
+      check((await page.locator('#historyList').innerText()).includes('Bicicleta: 15 min'), 'history shows each cardio activity separately');
+      if (process.env.SCREENSHOT_DIR) {
+        await mkdir(process.env.SCREENSHOT_DIR, {recursive: true});
+        await page.getByRole('button', {name: 'Treinar', exact: true}).click();
+        await page.screenshot({path: path.join(process.env.SCREENSHOT_DIR, 'treino-mobile.png'), fullPage: true});
+      }
+    }
     await page.getByRole('button', {name: 'Relatórios', exact: true}).click();
     const button = page.getByRole('button', {name: 'Analisar meu treino', exact: true});
     const result = page.locator('#analysisResults');

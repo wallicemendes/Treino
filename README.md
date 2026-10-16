@@ -1,4 +1,11 @@
-# Meu Treino — análise local e exportação para ChatGPT
+# Meu Treino — registro, análise local e exportação
+
+## Sessão atual e cardio
+
+- Uma sessão nova sempre começa com todos os exercícios desmarcados. Cargas anteriores aparecem somente como referência visual.
+- Alterações ainda não salvas formam um rascunho local identificado na tela e restaurado ao reabrir o app. Salvar ou descartar inicia uma sessão limpa.
+- Uma sessão aceita várias atividades de cardio: Esteira, Bicicleta e Escada. Cada item tem duração própria; Esteira também registra velocidade e inclinação.
+- Registros novos mantêm `cardio` como total numérico para compatibilidade e adicionam `cardioActivities`. Registros antigos com somente `cardio` continuam no histórico, nas análises e nas exportações sem reescrita destrutiva.
 
 ## Analisar meu treino no aplicativo
 
@@ -27,7 +34,7 @@ O teste de navegador serve os arquivos reais por HTTP, simula Firebase apenas no
 
 Em 15/10/2026 passaram 15 testes automatizados de cálculo/regressão e 42 verificações de navegador no Edge, nas larguras 320, 390, 430 e 1280 px. Foram verificados erro/retry, leitura restrita ao UID, ausência de escritas da análise, snapshots não confirmados, troca/saída de conta durante a leitura, limpeza de resultado, nomes de exercícios como texto, ausência de transbordamento horizontal e preservação das abas. A captura móvel foi inspecionada. Trata-se de emulação de viewport móvel; não foi testado em um iPhone físico nem com dados privados de uma conta real.
 
-Para publicar, mantenha `index.html`, `history-export.mjs`, `training-analysis.mjs` e `analysis-controller.mjs` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os quatro arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. Esses passos não exigem alterar regras ou configurações do Firebase.
+Para publicar, mantenha `index.html`, `cardio-utils.mjs`, `history-export.mjs`, `training-analysis.mjs` e `analysis-controller.mjs` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. Esses passos não exigem alterar regras ou configurações do Firebase.
 
 ## Como usar
 
