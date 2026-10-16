@@ -99,9 +99,22 @@ try {
       check(await page.locator('#todayWorkout').isVisible() && todayText.includes('Treino de hoje — salvo'), 'today summary returns when the app reopens');
       check(todayText.includes('25 kg') && todayText.includes('Esteira: 20 min') && todayText.includes('Bicicleta: 15 min'), 'today summary restores exercises and cardio values');
       check(await page.locator('.done:checked').count() === 0, 'reopened app keeps the new session unchecked');
+      await page.getByRole('button', {name: 'Editar', exact: true}).click();
+      check(await page.locator('#editBanner').isVisible() && await page.getByRole('button', {name: 'Salvar alterações', exact: true}).isVisible(), 'edit action clearly identifies saved-workout editing mode');
+      check(await page.locator('.done').first().isChecked() && await page.locator('.load').first().inputValue() === '25', 'editing loads saved completion and exercise values');
+      await page.locator('.load').first().fill('27.5');
+      await page.locator('.reps').first().fill('10,10,10');
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      check(await page.locator('#editBanner').isVisible() && await page.locator('.load').first().inputValue() === '27.5', 'saved-workout edit survives reload as an identified draft');
+      await page.getByRole('button', {name: 'Salvar alterações', exact: true}).click();
+      const updatedTodayText = await page.locator('#todayWorkout').innerText();
+      check(updatedTodayText.includes('27.5 kg') && updatedTodayText.includes('10,10,10 reps'), 'saving edits refreshes today summary values');
+      check(await page.evaluate(() => JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.length === 1), 'editing updates the existing workout without creating a duplicate');
       await page.getByRole('button', {name: 'Histórico', exact: true}).click();
       check((await page.locator('#historyList').innerText()).includes('Esteira: 20 min • 5.5 km/h • 2% inclinação'), 'history shows structured treadmill details');
       check((await page.locator('#historyList').innerText()).includes('Bicicleta: 15 min'), 'history shows each cardio activity separately');
+      check(await page.locator('#historyList').getByRole('button', {name: 'Editar', exact: true}).isVisible(), 'saved workouts can also be edited from history');
       if (process.env.SCREENSHOT_DIR) {
         await mkdir(process.env.SCREENSHOT_DIR, {recursive: true});
         await page.getByRole('button', {name: 'Treinar', exact: true}).click();
