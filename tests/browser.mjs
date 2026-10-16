@@ -68,6 +68,7 @@ try {
     await page.goto(url);
     await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
     check(await page.locator('.done:checked').count() === 0, `${width}px: new session starts with every exercise unchecked`);
+    check(!(await page.locator('#account').isVisible()) && !(await page.locator('#cloudTools').isVisible()), `${width}px: cloud controls stay off the training screen`);
     if (width === 390) {
       await page.locator('.done').first().check();
       await page.locator('.load').first().fill('25');
@@ -115,6 +116,10 @@ try {
     if (width === 390) {
       check((await page.locator('#todayWorkout').innerText()).includes('20 kg'), 'cloud sync refreshes today summary with the authenticated history');
       check(await page.locator('#todayWorkout img').count() === 0, 'today summary renders saved exercise names as text');
+      await page.getByRole('button', {name: 'Nuvem', exact: true}).click();
+      check(await page.locator('#account').isVisible() && await page.locator('#cloudTools').isVisible(), 'cloud tab contains account, sync and import controls');
+      check(await page.getByRole('button', {name: 'Importar registros deste aparelho', exact: true}).isVisible(), 'device import is available only inside cloud tab');
+      await page.getByRole('button', {name: 'Relatórios', exact: true}).click();
     }
     await button.click();
     await page.waitForFunction(() => document.getElementById('analysisStatus').textContent.includes('concluída'));
@@ -164,7 +169,7 @@ try {
       await page.evaluate(() => { window.__firebaseTest.release(); window.__firebaseTest.hold = false; });
       check(await result.innerText() === '' && await button.isDisabled(), 'logout during read never displays stale history');
       check(await page.evaluate(() => window.__firebaseTest.writes === 0), 'all analysis scenarios perform zero Firestore writes');
-      for (const tab of ['Treinar', 'Histórico', 'Backup']) {
+      for (const tab of ['Treinar', 'Histórico', 'Backup', 'Nuvem']) {
         await page.getByRole('button', {name: tab, exact: true}).click();
         check(await page.getByRole('button', {name: tab, exact: true}).getAttribute('class') === 'active', `existing tab ${tab} remains usable`);
       }

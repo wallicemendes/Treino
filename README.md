@@ -7,6 +7,7 @@
 - Alterações ainda não salvas formam um rascunho local identificado na tela e restaurado ao reabrir o app. Salvar ou descartar inicia uma sessão limpa.
 - Uma sessão aceita várias atividades de cardio: Esteira, Bicicleta e Escada. Cada item tem duração própria; Esteira também registra velocidade e inclinação.
 - Registros novos mantêm `cardio` como total numérico para compatibilidade e adicionam `cardioActivities`. Registros antigos com somente `cardio` continuam no histórico, nas análises e nas exportações sem reescrita destrutiva.
+- Login, status de sincronização, importação deste aparelho e atualização manual ficam reunidos na aba **Nuvem**, fora da tela de treino.
 
 ## Analisar meu treino no aplicativo
 
