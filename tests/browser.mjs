@@ -91,6 +91,13 @@ try {
       await page.getByRole('button', {name: 'Finalizar e salvar treino', exact: true}).click();
       check(await page.locator('.done:checked').count() === 0, 'saving starts a clean unchecked session');
       check(!(await page.locator('#draftBanner').isVisible()), 'saving clears the active draft');
+      check(await page.locator('#todayWorkout').isVisible() && (await page.locator('#todayWorkout').innerText()).includes('25 kg'), 'saved workout appears immediately in today summary');
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      const todayText = await page.locator('#todayWorkout').innerText();
+      check(await page.locator('#todayWorkout').isVisible() && todayText.includes('Treino de hoje — salvo'), 'today summary returns when the app reopens');
+      check(todayText.includes('25 kg') && todayText.includes('Esteira: 20 min') && todayText.includes('Bicicleta: 15 min'), 'today summary restores exercises and cardio values');
+      check(await page.locator('.done:checked').count() === 0, 'reopened app keeps the new session unchecked');
       await page.getByRole('button', {name: 'Histórico', exact: true}).click();
       check((await page.locator('#historyList').innerText()).includes('Esteira: 20 min • 5.5 km/h • 2% inclinação'), 'history shows structured treadmill details');
       check((await page.locator('#historyList').innerText()).includes('Bicicleta: 15 min'), 'history shows each cardio activity separately');
@@ -105,6 +112,10 @@ try {
     const result = page.locator('#analysisResults');
     check(await button.isDisabled(), `${width}px: signed-out button disabled`);
     await page.evaluate(() => window.__firebaseTest.switchUser('account-a'));
+    if (width === 390) {
+      check((await page.locator('#todayWorkout').innerText()).includes('20 kg'), 'cloud sync refreshes today summary with the authenticated history');
+      check(await page.locator('#todayWorkout img').count() === 0, 'today summary renders saved exercise names as text');
+    }
     await button.click();
     await page.waitForFunction(() => document.getElementById('analysisStatus').textContent.includes('concluída'));
     check((await result.innerText()).includes('30 minutos'), `${width}px: real analysis rendered`);
