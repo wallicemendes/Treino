@@ -2,17 +2,21 @@
 
 ## Fichas Upper/Lower com bi-sets — 27/10/2026
 
-Novas sessões usam a versão `upper-lower-5dias-biset-2026-10`. Segunda A, quarta C e sexta E treinam superiores; terça B e quinta D, inferiores. Sábado e domingo são dias de recuperação. A/C têm volume ajustado e E usa duas séries por exercício para adaptar o total semanal. Reserve 5 min para aquecimento, até aproximadamente 60 min para musculação (incluindo aproximação e transições) e 25 min para cardio moderado. A duração é estimada: encerre os acessórios ao atingir 60 min, registrando apenas o realizado; não acrescente séries apenas para preencher o tempo.
+Novas sessões usam a versão `upper-lower-5dias-biset-livre-2026-10`. Segunda A, quarta C e sexta E treinam superiores; terça B e quinta D, inferiores. Sábado e domingo são dias de recuperação. Foram acrescentados parceiros com peso corporal ou halteres: A/B/D/E têm oito exercícios, C tem nove. Cada par usa no máximo um aparelho. Os bi-sets têm duas rodadas; o volume foi ajustado para acomodar os acréscimos. Reserve 5 min para aquecimento, até aproximadamente 60 min para musculação (incluindo aproximação e transições) e 25 min para cardio moderado. A duração é estimada: encerre os acessórios ao atingir 60 min, registrando apenas o realizado; não acrescente séries apenas para preencher o tempo.
 
 | Dia | Séries separadas, nesta ordem | Bi-sets de acessórios, nesta ordem |
 | --- | --- | --- |
-| A | Supino máquina 3×10–12; Puxada articulada 3×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Rosca martelo 10–15 |
-| B | Leg Press 45° 3×10–12; Cadeira flexora 3×10–12 | 3 rodadas: Cadeira extensora 12–15 + Cadeira abdutora 12–15; 3 rodadas: Panturrilha em pé 15–20 + Prancha solo 20–40 s |
-| C | Supino inclinado articulado 3×10–12; Puxada triângulo 3×10–12; Remada máquina neutra 2×10–12 | 2 rodadas: Crucifixo máquina 12–15 + Elevação lateral 10–15; 2 rodadas: Rosca direta polia 10–15 + Tríceps pulley 10–15 |
-| D | Agachamento Hack 3×10–12; Leg Press 45° 3×10–12; Mesa flexora 3×10–12 | 2 rodadas: Cadeira adutora 12–15 + Abdominal curto solo 15–20; depois Panturrilha no Leg Press 3×15–20, separada |
-| E | Supino máquina 2×10–12; Puxada articulada 2×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Rosca martelo 10–15 |
+| A | Supino máquina 3×10–12; Puxada articulada 3×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Elevação lateral com halteres 10–15; 2 rodadas: Rosca martelo 10–15 + Tríceps francês com halter 10–15 |
+| B | Leg Press 45° 3×10–12; Cadeira flexora 3×10–12 | 2 rodadas: Cadeira extensora 12–15 + Agachamento livre sem carga 10–15; 2 rodadas: Cadeira abdutora 12–15 + Prancha lateral 20–30 s por lado; 2 rodadas: Panturrilha em pé 15–20 + Prancha solo 20–40 s |
+| C | Supino inclinado articulado 3×10–12; Puxada triângulo 3×10–12; Remada máquina neutra 2×10–12 | 2 rodadas: Crucifixo máquina 12–15 + Crucifixo inverso com halteres 12–15; 2 rodadas: Rosca direta polia 10–15 + Elevação lateral com halteres 10–15; 2 rodadas: Tríceps pulley 10–15 + Rosca alternada com halteres 10–12 por lado |
+| D | Agachamento Hack 3×10–12; Leg Press 45° 3×10–12; Mesa flexora 3×10–12 | 2 rodadas: Cadeira adutora 12–15 + Prancha lateral 20–30 s por lado; 2 rodadas: Abdominal curto solo 15–20 + Bird dog 8–10 por lado; depois Panturrilha no Leg Press 2×15–20, separada |
+| E | Supino máquina 2×10–12; Puxada articulada 2×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Crucifixo inverso com halteres 12–15; 2 rodadas: Rosca martelo 10–15 + Abdominal dead bug 8–10 por lado |
 
 Descanse 90–120 s nos compostos (até 180 s quando necessário), 60–90 s nos acessórios separados e 60–90 s após cada par. Entre os exercícios do bi-set, use apenas o tempo de troca, cerca de 15–30 s. Se os aparelhos estiverem ocupados, faça séries separadas.
+
+Na tela, cada bi-set é um bloco com **PRIMEIRO exercício** e **SEGUNDO exercício** e registros independentes. Faça uma série de cada, descanse e repita a rodada. Não conclua todas as séries do primeiro antes do segundo. Os parceiros livres têm dicas de equipamento e execução; nomes históricos como `Elevação lateral` não são renomeados nos registros. Comece os exercícios novos com peso corporal ou halteres leves e 2–3 repetições em reserva. O agachamento após a extensora é acessório leve, sem carga externa. Metas “cada lado” não devem ser somadas nem tratadas como repetições bilaterais pela análise.
+
+Rascunhos existentes mantêm a ficha e a versão em que foram iniciados. O app avisa quando o rascunho é anterior: salve-o ou descarte-o conscientemente para iniciar a nova ficha. A atualização não troca os exercícios dentro de registros salvos.
 
 As cargas anteriores são consultadas pelo nome exato e pela data mais recente até a data da sessão, sem preencher os campos da nova sessão. Comece a adaptação com 2–3 repetições em reserva. Atingir o topo da faixa em todas as séries, com técnica e 1–2 repetições em reserva em duas sessões, permite tentar o menor incremento disponível (~2–5%). Reduza um incremento se ficar abaixo da faixa. Para prancha, progrida a duração até 40 s. Cargas de exercícios sem registro precisam ser calibradas; a carga do antigo exercício combinado de braços não é transferida aos dois exercícios novos.
 
@@ -20,7 +24,7 @@ O planejamento considera a revisão sobre bi-sets [Sports Medicine, 2025](https:
 
 ### Compatibilidade e dados
 
-Validação local em 27/10/2026: 26 testes automatizados e 114 verificações no Microsoft Edge, em 320, 390, 430 e 1280 px. Inclui preservação de registros e rascunhos antigos, novas fichas A–E, sugestão dos cinco dias úteis, ausência de elevação pélvica na nova ficha D, distância/calorias de cardio, exportação e análise, e preparação do envio ao Atalho. Firebase autenticado foi simulado; o SDK real foi testado sem login. Não houve escrita em dados de produção nem execução real do Atalho no iPhone.
+Validação local em 27/10/2026: 29 testes automatizados e 122 verificações no Microsoft Edge, em 320, 390, 430 e 1280 px. Inclui pares agrupados com parceiros livres, aumento real da quantidade de exercícios, limite de um aparelho por par, preservação de registros e rascunhos antigos, fichas A–E, cardio, exportação/análise e envio ao Atalho. Firebase autenticado foi simulado; o SDK real foi testado sem login. Não houve escrita em dados de produção nem execução real do Atalho no iPhone.
 
 Não há migração nem escrita no Firestore ao abrir as novas fichas. Nomes existentes permanecem idênticos. O exercício histórico `Rosca direta polia + tríceps pulley` continua nos registros e gráficos; somente novas sessões C passam a registrar os dois braços separadamente.
 
