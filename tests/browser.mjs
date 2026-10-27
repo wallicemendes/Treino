@@ -8,7 +8,7 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = fileURLToPath(new URL('../', import.meta.url));
-const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs', 'cardio-utils.mjs', 'health-shortcut.mjs', 'health-shortcut-ui.mjs', 'saude-iphone.txt']);
+const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs', 'cardio-utils.mjs']);
 const server = createServer(async (request, response) => {
   const name = new URL(request.url, 'http://localhost').pathname.slice(1) || 'index.html';
   if (!allowed.has(name)) { response.writeHead(404).end(); return; }
@@ -189,50 +189,7 @@ try {
       check(await page.locator('#todayWorkout').isVisible() && todayText.includes('Treino de hoje — salvo'), 'today summary returns when the app reopens');
       check(todayText.includes('25 kg') && todayText.includes('Esteira: 20 min') && todayText.includes('Bicicleta: 15 min'), 'today summary restores exercises and cardio values');
       check(todayText.includes('1.8 km • 150 kcal') && todayText.includes('5 km • 90 kcal'), 'saved summary displays distance and calories per activity');
-      const beforeHealth=await page.evaluate(()=>localStorage.getItem('meu_treino_historico_v2'));
-      await page.locator('#todayWorkout').getByRole('button',{name:'Enviar ao Saúde',exact:true}).click();
-      await page.locator('#healthDialog').waitFor({state:'visible'});
-      check(await page.locator('#healthMinutes').inputValue()==='' && await page.locator('#healthTime').inputValue()==='', 'health handoff requires actual strength duration and start time without assuming 90 minutes');
-      check(await page.locator('#healthActivity option').count()===3, 'health handoff separates strength and each cardio activity');
-      await page.locator('#healthTime').fill('06:00');
-      await page.locator('#healthMinutes').fill('40');
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      check(!(await page.locator('#healthLaunch').isVisible()), 'health link cannot be prepared without duplicate check confirmation');
-      await page.locator('#healthConfirmed').check();
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      const strengthUrl=new URL(await page.locator('#healthLaunch').getAttribute('href'));
-      const strengthPayload=JSON.parse(strengthUrl.searchParams.get('text'));
-      check(strengthUrl.protocol==='shortcuts:' && strengthUrl.searchParams.get('name')==='Meu Treino Saúde' && strengthPayload.durationMinutes===40 && !Object.hasOwn(strengthPayload,'caloriesKcal'), 'health link uses encoded shortcut text and actual strength duration with no invented energy');
-      if(process.env.SCREENSHOT_DIR){
-        await mkdir(process.env.SCREENSHOT_DIR,{recursive:true});
-        await page.screenshot({path:path.join(process.env.SCREENSHOT_DIR,'saude-mobile.png')});
-      }
-      await page.locator('#healthActivity').selectOption('cardio-0');
-      check(await page.locator('#healthMinutes').inputValue()==='20' && await page.locator('#healthDistance').inputValue()==='1.8' && await page.locator('#healthCalories').inputValue()==='150' && await page.locator('#healthTime').inputValue()==='', 'health cardio preloads actual recorded metrics but requires its own start time');
-      check(!(await page.locator('#healthLaunch').isVisible()), 'changing activity invalidates the previously prepared health link');
-      await page.locator('#healthTime').fill('07:00');
-      await page.locator('#healthConfirmed').check();
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      const cardioPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
-      check(cardioPayload.activityType==='Caminhada' && cardioPayload.durationMinutes===20 && cardioPayload.distanceKm===1.8 && cardioPayload.caloriesKcal===150, 'cardio handoff includes distance in km and user-reviewed energy in kcal');
-      await page.locator('#healthDistance').fill('0');
-      await page.locator('#healthCalories').fill('0');
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      const zeroPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
-      check(zeroPayload.distanceKm===0 && zeroPayload.caloriesKcal===0, 'health handoff preserves explicit zero optional values');
-      await page.locator('#healthDistance').fill('');
-      await page.locator('#healthCalories').fill('');
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      const blankPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
-      check(!Object.hasOwn(blankPayload,'distanceKm') && !Object.hasOwn(blankPayload,'caloriesKcal'), 'health handoff omits blank metrics instead of recording zeros');
-      await page.locator('#healthDate').fill('2099-01-01');
-      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
-      check((await page.locator('#healthStatus').innerText()).includes('terminado') && !(await page.locator('#healthLaunch').isVisible()), 'health handoff rejects future activities');
-      check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth && document.getElementById('healthDialog').scrollWidth<=document.getElementById('healthDialog').clientWidth), 'health dialog fits mobile viewport without horizontal overflow');
-      const guideResponse=await page.request.get(url+'/saude-iphone.txt');
-      check(guideResponse.ok() && (await guideResponse.text()).includes('Registrar Treino'), 'shortcut setup guide is served with the application');
-      await page.locator('#healthDialog').getByRole('button',{name:'Fechar',exact:true}).click();
-      check(await page.evaluate(()=>localStorage.getItem('meu_treino_historico_v2'))===beforeHealth, 'health preparation never rewrites workout history');
+      check(await page.getByRole('button',{name:'Enviar ao Saúde',exact:true}).count()===0 && await page.locator('#healthDialog').count()===0, 'saved session has no Health integration entry point');
       check(await page.locator('.done:checked').count() === 0, 'reopened app keeps the new session unchecked');
       await page.getByRole('button', {name: 'Editar', exact: true}).click();
       check(await page.locator('#editBanner').isVisible() && await page.getByRole('button', {name: 'Salvar alterações', exact: true}).isVisible(), 'edit action clearly identifies saved-workout editing mode');
@@ -253,10 +210,7 @@ try {
       check((await page.locator('#historyList').innerText()).includes('Esteira: 20 min • 5.5 km/h • 2% inclinação'), 'history shows structured treadmill details');
       check((await page.locator('#historyList').innerText()).includes('Bicicleta: 15 min'), 'history shows each cardio activity separately');
       check((await page.locator('#historyList').innerText()).includes('2.1 km • 160 kcal'), 'history shows entered cardio distance and calories');
-      await page.locator('#historyList').getByRole('button',{name:'Enviar ao Saúde',exact:true}).click();
-      await page.locator('#healthDialog').waitFor({state:'visible'});
-      check(await page.locator('#healthActivity option').count()===3, 'saved history also exposes the health handoff');
-      await page.locator('#healthDialog').getByRole('button',{name:'Fechar',exact:true}).click();
+      check(await page.locator('#historyList').getByRole('button',{name:'Enviar ao Saúde',exact:true}).count()===0, 'history has no Health integration entry point');
       check(await page.locator('#historyList').getByRole('button', {name: 'Editar', exact: true}).isVisible(), 'saved workouts can also be edited from history');
       if (process.env.SCREENSHOT_DIR) {
         await mkdir(process.env.SCREENSHOT_DIR, {recursive: true});

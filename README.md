@@ -26,7 +26,7 @@ A [meta-análise de 2025](https://doi.org/10.1007/s40279-025-02176-8), com 19 es
 
 ### Compatibilidade e dados
 
-Validação local em 27/10/2026: 30 testes automatizados e 123 verificações no Microsoft Edge, em 320, 390, 430 e 1280 px. Todos os pares em A–E foram verificados para conter exatamente uma máquina/polia primeiro e um exercício livre depois. Também inclui preservação de registros e rascunhos antigos, aviso de ficha anterior fora das orientações recolhidas, cardio, exportação/análise e envio ao Atalho. Firebase autenticado foi simulado; o SDK real foi testado sem login. Não houve escrita em dados de produção nem execução real do Atalho no iPhone.
+A suíte verifica pares máquina/polia + exercício livre em A–E, preservação de registros e rascunhos antigos, cardio, exportação e análise. A integração com Saúde/Atalhos e a estimativa de calorias da musculação foram removidas. O app não envia dados ao Saúde. Firebase autenticado é simulado nos testes; dados de produção não são alterados.
 
 Não há migração nem escrita no Firestore ao abrir as novas fichas. Nomes existentes permanecem idênticos. O exercício histórico `Rosca direta polia + tríceps pulley` continua nos registros e gráficos; somente novas sessões C passam a registrar os dois braços separadamente.
 
@@ -35,18 +35,6 @@ Editar um registro usa os exercícios, séries e metas daquele registro, inclusi
 Novos registros adicionam `planVersion` e os exercícios pareados adicionam `biset` (identificador local à sessão). A exportação schemaVersion 2 aceita esses campos opcionais e mantém os campos existentes; a análise continua agrupando pelo nome exato. Não publique exportações pessoais no repositório.
 
 ## Sessão atual e cardio
-
-### Enviar uma atividade ao Saúde por Atalho do iPhone
-
-Após salvar, use **Enviar ao Saúde** no resumo do dia ou no Histórico. O formulário separa musculação e cada atividade de cardio, pede início real, exige duração real para musculação e permite revisar distância e calorias ativas. Não usa os 90 minutos planejados como duração realizada. Campos opcionais vazios são omitidos; zero explícito é mantido.
-
-O botão **Revisar envio** prepara um link para **Abrir Atalho e confirmar**, usando o protocolo oficial `shortcuts://run-shortcut?name=…&input=text&text=…` com JSON codificado. O nome padrão é **Meu Treino Saúde**, alterável no formulário. O Atalho deve ser criado uma vez no iPhone seguindo [saude-iphone.txt](saude-iphone.txt), também acessível no diálogo. O roteiro inclui confirmação antes da ação Registrar Treino e tratamento de distância/calorias opcionais sem substituí-las por zero.
-
-O pacote não instala um Atalho no aparelho. A configuração básica registra início/duração/tipo; para gravar distância e calorias também, configure os ramos opcionais descritos no roteiro. Confira o resultado no Saúde após a primeira execução. O app não confirma a gravação, não marca dados como sincronizados e não altera o registro no Firestore. Confira se a atividade já foi registrada pelo Apple Watch antes de reenviar.
-
-São enviados somente tipo, início/fim, duração e métricas opcionais. UID, e-mail, notas e exercícios detalhados não são incluídos. O nome do Atalho é a única preferência persistida pelo formulário. O envio abre somente por ação explícita do usuário e exige confirmar que não há registro duplicado.
-
-Validação desta integração: 26 testes automatizados e 114 verificações de navegador no total, incluindo codificação da URL, dados opcionais, campos obrigatórios, seleção por atividade, bloqueio de datas futuras e ausência de alteração no histórico. Não houve execução de Atalho ou gravação real no Saúde de um iPhone.
 
 - Uma sessão nova sempre começa com todos os exercícios desmarcados. Cargas anteriores aparecem somente como referência visual.
 - Ao abrir o aplicativo, os treinos já salvos na data atual aparecem em **Treino de hoje — salvo**, com exercícios, cargas, repetições, cardio e observações, sem preencher a nova sessão.
@@ -85,7 +73,7 @@ O teste de navegador serve os arquivos reais por HTTP, simula Firebase apenas no
 
 Em 15/10/2026 passaram 15 testes automatizados de cálculo/regressão e 42 verificações de navegador no Edge, nas larguras 320, 390, 430 e 1280 px. Foram verificados erro/retry, leitura restrita ao UID, ausência de escritas da análise, snapshots não confirmados, troca/saída de conta durante a leitura, limpeza de resultado, nomes de exercícios como texto, ausência de transbordamento horizontal e preservação das abas. A captura móvel foi inspecionada. Trata-se de emulação de viewport móvel; não foi testado em um iPhone físico nem com dados privados de uma conta real.
 
-Para publicar, mantenha `index.html`, todos os módulos `.mjs` do app (incluindo `health-shortcut.mjs` e `health-shortcut-ui.mjs`) e `saude-iphone.txt` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. No iPhone, configure o Atalho e valide uma atividade sem reenviar uma já registrada. Esses passos não exigem alterar regras ou configurações do Firebase.
+Para publicar, mantenha `index.html`, `cardio-utils.mjs`, `history-export.mjs`, `training-analysis.mjs` e `analysis-controller.mjs` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy e confira a versão pública. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização. Não é necessário alterar regras ou configurações do Firebase.
 
 ## Como usar
 
