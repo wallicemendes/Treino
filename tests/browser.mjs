@@ -76,7 +76,7 @@ try {
         check(await page.locator('.biset-group').evaluateAll(groups=>groups.every(group=>group.querySelectorAll('.exercise').length===2 && group.textContent.includes('Uma série de cada'))), day+': each bi-set is one group with two separately recorded exercises and explicit execution order');
         if(day==='B'){
           const pairs=await page.locator('.biset-group').allTextContents();
-          check(pairs[0].includes('Cadeira extensora')&&pairs[0].includes('Agachamento livre sem carga')&&pairs[1].includes('Cadeira abdutora')&&pairs[1].includes('Prancha lateral'), 'B adds free partners instead of pairing the two machines');
+          check(pairs[0].includes('Cadeira extensora')&&pairs[0].includes('Prancha solo')&&pairs[1].includes('Cadeira abdutora')&&pairs[1].includes('Abdominal dead bug'), 'B pairs each machine with separate core work instead of another machine or quadriceps exercise');
         }
         if (day === 'D') {
           const names=await page.locator('.exercise-title').allTextContents();
@@ -116,7 +116,7 @@ try {
       await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
       check(await page.evaluate(record => {
         const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
-        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-5dias-biset-livre-2026-10' && records[1].exercises.length===9 && records[1].exercises.filter(item=>item.biset).length===6;
+        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-5dias-maquina-livre-v2-2026-10' && records[1].exercises.length===9 && records[1].exercises.filter(item=>item.biset).length===6;
       },legacy), 'new C appends with separate arms and bi-set metadata without overwriting legacy');
       await page.locator('#day').selectOption('E');
       await page.locator('.done').first().check();
@@ -133,6 +133,7 @@ try {
       await page.waitForFunction(()=>!!document.getElementById('exportChatGPT'));
       await page.locator('#planGuide summary').click();
       check(await page.locator('.exercise').count()===6 && (await page.locator('#planGuide').innerText()).includes('rascunho mantém a ficha anterior'), 'existing six-exercise draft is preserved with clear instructions to start a new plan');
+      check((await page.locator('#draftBanner').innerText()).includes('Ficha anterior'), 'old draft warning is visible outside the collapsed workout instructions');
       await page.getByRole('button',{name:'Finalizar e salvar treino',exact:true}).click();
       check(await page.evaluate(()=>{const saved=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.at(-1);return saved.planVersion==='upper-lower-5dias-biset-2026-10'&&saved.exercises.length===6;}), 'saving a pre-update draft retains its original plan version and exercise count');
       await page.evaluate(() => {
