@@ -22,14 +22,14 @@ export function buildHistoryExport(data) {
     throw Error('Histórico inválido. Nenhum arquivo foi gerado.');
   }
   const workouts = data.workouts.map(workout => {
-    const selected = selectFields(workout, ['date', 'day', 'cardio', 'notes']);
+    const selected = selectFields(workout, ['date', 'day', 'cardio', 'notes', 'planVersion']);
     if (!Array.isArray(workout.exercises)) {
       throw Error('Histórico inválido. Nenhum arquivo foi gerado.');
     }
     selected.exercises = workout.exercises.map(exercise =>
-      selectFields(exercise, ['name', 'sets', 'target', 'done', 'load', 'reps']));
+      selectFields(exercise, ['name', 'sets', 'target', 'done', 'load', 'reps', 'biset']));
     selected.cardioActivities = normalizeCardioActivities(workout).map(activity =>
-      selectFields(activity, ['type', 'minutes', 'speed', 'incline', 'legacy']));
+      selectFields(activity, ['type', 'minutes', 'speed', 'incline', 'distance', 'calories', 'legacy']));
     return selected;
   });
   const weights = data.weights.map(weight => selectFields(weight, ['date', 'value']));
@@ -38,15 +38,19 @@ export function buildHistoryExport(data) {
     application: 'Meu Treino',
     exportedAt: new Date().toISOString(),
     source: 'Firestore: histórico da conta autenticada, documento principal',
-    units: {load: 'kg por exercício, não por lado', cardio: 'minutos', speed: 'km/h', incline: '%', weight: 'kg'},
+    units: {load: 'kg por exercício, não por lado', cardio: 'minutos', speed: 'km/h', incline: '%', distance: 'km', calories: 'kcal', weight: 'kg'},
     fieldGuide: {
-      day: 'Identificador do treino A, B, C ou D',
+      day: 'Identificador do treino A, B, C, D ou E',
+      planVersion: 'Versão opcional da ficha; ausente em registros antigos',
+      biset: 'Par opcional dentro da sessão; cada exercício mantém sua própria carga e repetições',
       sets: 'Séries planejadas',
       target: 'Repetições ou duração planejadas',
       done: 'Indica se o exercício foi realizado',
       load: 'Carga registrada; string vazia significa não informada',
       reps: 'Repetições realizadas, texto original por série; pode incluir duração',
       cardioActivities: 'Atividades de cardio normalizadas; registros antigos aparecem como Cardio (registro legado)',
+      distance: 'Distância opcional de cada atividade de cardio, informada pelo usuário; ausente significa não informada',
+      calories: 'Calorias opcionais de cada atividade de cardio, informadas pelo usuário; não são calculadas pelo aplicativo',
       weights: 'Peso corporal: date é a data local registrada e value é o peso em kg',
       notes: 'Observações escritas pelo usuário; podem conter informações pessoais'
     },

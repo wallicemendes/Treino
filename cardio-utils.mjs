@@ -15,6 +15,10 @@ export function normalizeCardioActivities(workout) {
       const minutes = finiteNumber(activity.minutes, 1, 300);
       if (minutes === null) return [];
       const normalized = {type: activity.type, minutes};
+      const distance = finiteNumber(activity.distance, 0, 1000);
+      const calories = finiteNumber(activity.calories, 0, 100000);
+      if (distance !== null) normalized.distance = distance;
+      if (calories !== null) normalized.calories = calories;
       if (activity.type === 'Esteira') {
         const speed = finiteNumber(activity.speed, 0.1, 30);
         const incline = finiteNumber(activity.incline, 0, 30);
@@ -44,5 +48,7 @@ export function describeCardio(activity) {
     if (activity.speed !== undefined) description += ` • ${activity.speed} km/h`;
     if (activity.incline !== undefined) description += ` • ${activity.incline}% inclinação`;
   }
+  if (activity.distance !== undefined) description += ` • ${activity.distance} km`;
+  if (activity.calories !== undefined) description += ` • ${activity.calories} kcal`;
   return description;
 }

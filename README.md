@@ -1,12 +1,54 @@
 # Meu Treino — registro, análise local e exportação
 
+## Fichas Upper/Lower com bi-sets — 27/10/2026
+
+Novas sessões usam a versão `upper-lower-5dias-biset-2026-10`. Segunda A, quarta C e sexta E treinam superiores; terça B e quinta D, inferiores. Sábado e domingo são dias de recuperação. A/C têm volume ajustado e E usa duas séries por exercício para adaptar o total semanal. Reserve 5 min para aquecimento, até aproximadamente 60 min para musculação (incluindo aproximação e transições) e 25 min para cardio moderado. A duração é estimada: encerre os acessórios ao atingir 60 min, registrando apenas o realizado; não acrescente séries apenas para preencher o tempo.
+
+| Dia | Séries separadas, nesta ordem | Bi-sets de acessórios, nesta ordem |
+| --- | --- | --- |
+| A | Supino máquina 3×10–12; Puxada articulada 3×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Rosca martelo 10–15 |
+| B | Leg Press 45° 3×10–12; Cadeira flexora 3×10–12 | 3 rodadas: Cadeira extensora 12–15 + Cadeira abdutora 12–15; 3 rodadas: Panturrilha em pé 15–20 + Prancha solo 20–40 s |
+| C | Supino inclinado articulado 3×10–12; Puxada triângulo 3×10–12; Remada máquina neutra 2×10–12 | 2 rodadas: Crucifixo máquina 12–15 + Elevação lateral 10–15; 2 rodadas: Rosca direta polia 10–15 + Tríceps pulley 10–15 |
+| D | Agachamento Hack 3×10–12; Leg Press 45° 3×10–12; Mesa flexora 3×10–12 | 2 rodadas: Cadeira adutora 12–15 + Abdominal curto solo 15–20; depois Panturrilha no Leg Press 3×15–20, separada |
+| E | Supino máquina 2×10–12; Puxada articulada 2×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Rosca martelo 10–15 |
+
+Descanse 90–120 s nos compostos (até 180 s quando necessário), 60–90 s nos acessórios separados e 60–90 s após cada par. Entre os exercícios do bi-set, use apenas o tempo de troca, cerca de 15–30 s. Se os aparelhos estiverem ocupados, faça séries separadas.
+
+As cargas anteriores são consultadas pelo nome exato e pela data mais recente até a data da sessão, sem preencher os campos da nova sessão. Comece a adaptação com 2–3 repetições em reserva. Atingir o topo da faixa em todas as séries, com técnica e 1–2 repetições em reserva em duas sessões, permite tentar o menor incremento disponível (~2–5%). Reduza um incremento se ficar abaixo da faixa. Para prancha, progrida a duração até 40 s. Cargas de exercícios sem registro precisam ser calibradas; a carga do antigo exercício combinado de braços não é transferida aos dois exercícios novos.
+
+O planejamento considera a revisão sobre bi-sets [Sports Medicine, 2025](https://doi.org/10.1007/s40279-025-02176-8) e o posicionamento [ACSM, 2026](https://doi.org/10.1249/MSS.0000000000003897). São escolhas práticas de programação; duração e resposta individual variam.
+
+### Compatibilidade e dados
+
+Validação local em 27/10/2026: 26 testes automatizados e 114 verificações no Microsoft Edge, em 320, 390, 430 e 1280 px. Inclui preservação de registros e rascunhos antigos, novas fichas A–E, sugestão dos cinco dias úteis, ausência de elevação pélvica na nova ficha D, distância/calorias de cardio, exportação e análise, e preparação do envio ao Atalho. Firebase autenticado foi simulado; o SDK real foi testado sem login. Não houve escrita em dados de produção nem execução real do Atalho no iPhone.
+
+Não há migração nem escrita no Firestore ao abrir as novas fichas. Nomes existentes permanecem idênticos. O exercício histórico `Rosca direta polia + tríceps pulley` continua nos registros e gráficos; somente novas sessões C passam a registrar os dois braços separadamente.
+
+Editar um registro usa os exercícios, séries e metas daquele registro, inclusive após recarregar o rascunho, preservando campos adicionais. O seletor de dia fica bloqueado durante a edição. Novas sessões acrescentam registros. Rascunhos anteriores à atualização mantêm os exercícios e usam as prescrições antigas quando séries e metas ainda não estavam no rascunho.
+
+Novos registros adicionam `planVersion` e os exercícios pareados adicionam `biset` (identificador local à sessão). A exportação schemaVersion 2 aceita esses campos opcionais e mantém os campos existentes; a análise continua agrupando pelo nome exato. Não publique exportações pessoais no repositório.
+
 ## Sessão atual e cardio
+
+### Enviar uma atividade ao Saúde por Atalho do iPhone
+
+Após salvar, use **Enviar ao Saúde** no resumo do dia ou no Histórico. O formulário separa musculação e cada atividade de cardio, pede início real, exige duração real para musculação e permite revisar distância e calorias ativas. Não usa os 90 minutos planejados como duração realizada. Campos opcionais vazios são omitidos; zero explícito é mantido.
+
+O botão **Revisar envio** prepara um link para **Abrir Atalho e confirmar**, usando o protocolo oficial `shortcuts://run-shortcut?name=…&input=text&text=…` com JSON codificado. O nome padrão é **Meu Treino Saúde**, alterável no formulário. O Atalho deve ser criado uma vez no iPhone seguindo [saude-iphone.txt](saude-iphone.txt), também acessível no diálogo. O roteiro inclui confirmação antes da ação Registrar Treino e tratamento de distância/calorias opcionais sem substituí-las por zero.
+
+O pacote não instala um Atalho no aparelho. A configuração básica registra início/duração/tipo; para gravar distância e calorias também, configure os ramos opcionais descritos no roteiro. Confira o resultado no Saúde após a primeira execução. O app não confirma a gravação, não marca dados como sincronizados e não altera o registro no Firestore. Confira se a atividade já foi registrada pelo Apple Watch antes de reenviar.
+
+São enviados somente tipo, início/fim, duração e métricas opcionais. UID, e-mail, notas e exercícios detalhados não são incluídos. O nome do Atalho é a única preferência persistida pelo formulário. O envio abre somente por ação explícita do usuário e exige confirmar que não há registro duplicado.
+
+Validação desta integração: 26 testes automatizados e 114 verificações de navegador no total, incluindo codificação da URL, dados opcionais, campos obrigatórios, seleção por atividade, bloqueio de datas futuras e ausência de alteração no histórico. Não houve execução de Atalho ou gravação real no Saúde de um iPhone.
 
 - Uma sessão nova sempre começa com todos os exercícios desmarcados. Cargas anteriores aparecem somente como referência visual.
 - Ao abrir o aplicativo, os treinos já salvos na data atual aparecem em **Treino de hoje — salvo**, com exercícios, cargas, repetições, cardio e observações, sem preencher a nova sessão.
 - O botão **Editar** no resumo de hoje e no Histórico carrega o registro salvo no formulário, preserva a edição como rascunho e atualiza o mesmo treino sem criar duplicata.
 - Alterações ainda não salvas formam um rascunho local identificado na tela e restaurado ao reabrir o app. Salvar ou descartar inicia uma sessão limpa.
 - Uma sessão aceita várias atividades de cardio: Esteira, Bicicleta e Escada. Cada item tem duração própria; Esteira também registra velocidade e inclinação.
+- Cada atividade permite informar opcionalmente distância em km e calorias em kcal, copiadas do aparelho ou relógio. Esses valores não são estimados pelo app. Campos vazios permanecem ausentes; zero explícito é preservado. Valores negativos ou fora dos limites (1000 km e 100000 kcal por atividade) impedem salvar.
+- Distância e calorias acompanham o rascunho, a edição, o resumo do dia, o histórico, o backup e a exportação para ChatGPT. São os campos opcionais `distance` e `calories` em `cardioActivities`; registros antigos não recebem valores inventados e não são migrados.
 - Registros novos mantêm `cardio` como total numérico para compatibilidade e adicionam `cardioActivities`. Registros antigos com somente `cardio` continuam no histórico, nas análises e nas exportações sem reescrita destrutiva.
 - Login, status de sincronização, importação deste aparelho e atualização manual ficam reunidos na aba **Nuvem**, fora da tela de treino.
 
@@ -37,7 +79,7 @@ O teste de navegador serve os arquivos reais por HTTP, simula Firebase apenas no
 
 Em 15/10/2026 passaram 15 testes automatizados de cálculo/regressão e 42 verificações de navegador no Edge, nas larguras 320, 390, 430 e 1280 px. Foram verificados erro/retry, leitura restrita ao UID, ausência de escritas da análise, snapshots não confirmados, troca/saída de conta durante a leitura, limpeza de resultado, nomes de exercícios como texto, ausência de transbordamento horizontal e preservação das abas. A captura móvel foi inspecionada. Trata-se de emulação de viewport móvel; não foi testado em um iPhone físico nem com dados privados de uma conta real.
 
-Para publicar, mantenha `index.html`, `cardio-utils.mjs`, `history-export.mjs`, `training-analysis.mjs` e `analysis-controller.mjs` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. Esses passos não exigem alterar regras ou configurações do Firebase.
+Para publicar, mantenha `index.html`, todos os módulos `.mjs` do app (incluindo `health-shortcut.mjs` e `health-shortcut-ui.mjs`) e `saude-iphone.txt` juntos na raiz servida pelo GitHub Pages. Após publicar na `main`, aguarde o deploy do Pages e confira os arquivos no endereço público. Em uma sessão real, valide **Relatórios → Analisar meu treino** após a sincronização e compare os resultados com seu histórico. No iPhone, configure o Atalho e valide uma atividade sem reenviar uma já registrada. Esses passos não exigem alterar regras ou configurações do Firebase.
 
 ## Como usar
 

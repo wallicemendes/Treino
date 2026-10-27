@@ -8,11 +8,11 @@ import path from 'node:path';
 const require = createRequire(import.meta.url);
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const root = fileURLToPath(new URL('../', import.meta.url));
-const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs', 'cardio-utils.mjs']);
+const allowed = new Set(['index.html', 'training-analysis.mjs', 'analysis-controller.mjs', 'history-export.mjs', 'cardio-utils.mjs', 'health-shortcut.mjs', 'health-shortcut-ui.mjs', 'saude-iphone.txt']);
 const server = createServer(async (request, response) => {
   const name = new URL(request.url, 'http://localhost').pathname.slice(1) || 'index.html';
   if (!allowed.has(name)) { response.writeHead(404).end(); return; }
-  response.setHeader('Content-Type', name.endsWith('.html') ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8');
+  response.setHeader('Content-Type', name.endsWith('.html') ? 'text/html; charset=utf-8' : name.endsWith('.txt') ? 'text/plain; charset=utf-8' : 'text/javascript; charset=utf-8');
   response.end(await readFile(path.join(root, name)));
 });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -70,18 +70,91 @@ try {
     check(await page.locator('.done:checked').count() === 0, `${width}px: new session starts with every exercise unchecked`);
     check(!(await page.locator('#account').isVisible()) && !(await page.locator('#cloudTools').isVisible()), `${width}px: cloud controls stay off the training screen`);
     if (width === 390) {
+      for (const [day, count, pairs] of [['A',6,2],['B',6,4],['C',7,4],['D',6,2],['E',6,2]]) {
+        await page.locator('#day').selectOption(day);
+        check(await page.locator('.exercise').count() === count && await page.locator('.biset-label').count() === pairs, day + ': complete plan and explicit paired accessory labels');
+        if (day === 'D') {
+          const names=await page.locator('.exercise-title').allTextContents();
+          assert.equal(names.includes('Elevação pélvica máquina'),false);
+          assert.equal(names[1],'Leg Press 45°');
+        }
+      }
+      check((await page.locator('#planGuide').innerText()).includes('25 min'), 'session guide includes cardio and progression');
+      for (const [date,day] of [['2026-10-19','A'],['2026-10-20','B'],['2026-10-21','C'],['2026-10-22','D'],['2026-10-23','E']]) {
+        await page.clock.setFixedTime(new Date(date+'T12:00:00Z'));
+        check(await page.evaluate(() => suggestedDay())===day, date+': weekday maps to '+day);
+      }
+      await page.clock.setFixedTime(new Date('2026-10-15T12:00:00Z'));
+      check(await page.evaluate(() => {
+        const original=db;
+        db={workouts:[{date:'2026-10-14',exercises:[{name:'Reference',done:true,load:'10'}]},{date:'2026-10-13',exercises:[{name:'Reference',done:true,load:'20'}]},{date:'2026-10-16',exercises:[{name:'Reference',done:true,load:'30'}]}],weights:[]};
+        const reference=recentLoad('Reference');db=original;
+        return reference==='10';
+      }), 'load reference uses chronological date and excludes sessions after selected date');
+      const legacy = {id:'legacy-c',date:'2026-10-14',day:'C',cardio:20,notes:'original',extra:'preserve',exercises:[{name:'Rosca direta polia + tríceps pulley',sets:2,target:'12 cada',done:true,load:'20',reps:'12,12',extra:'keep'}]};
+      await page.evaluate(record => {
+        localStorage.setItem('meu_treino_historico_v2',JSON.stringify({workouts:[record],weights:[]}));
+        localStorage.removeItem('meu_treino_rascunho_v1');
+      }, legacy);
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      check(await page.evaluate(() => JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.length === 1), 'opening new plans does not migrate history');
+      await page.evaluate(() => editWorkout('legacy-c'));
+      check(await page.locator('.exercise').count() === 1 && (await page.locator('.exercise-title').innerText()).includes(' + '), 'editing legacy C retains combined exercise instead of replacing it');
+      check(await page.locator('#day').isDisabled(), 'saved workout day stays fixed during editing');
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      await page.getByRole('button', {name:'Salvar alterações',exact:true}).click();
+      check(await page.evaluate(record => JSON.stringify(JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts[0]) === JSON.stringify(record),legacy), 'save and reload of legacy edit preserves the entire original record');
+      await page.locator('#day').selectOption('C');
+      await page.locator('.done').first().check();
+      await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
+      check(await page.evaluate(record => {
+        const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
+        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-5dias-biset-2026-10' && records[1].exercises.filter(item=>item.biset).length===4;
+      },legacy), 'new C appends with separate arms and bi-set metadata without overwriting legacy');
+      await page.locator('#day').selectOption('E');
+      await page.locator('.done').first().check();
+      await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
+      check(await page.evaluate(() => {
+        const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
+        return records.length===3 && records[2].day==='E' && records[2].exercises.length===6 && records[2].exercises.every(item=>item.sets===2);
+      }), 'fifth training day saves independently with adjusted volume');
+      await page.evaluate(() => {
+        localStorage.setItem('meu_treino_historico_v2',JSON.stringify({workouts:[],weights:[]}));
+        localStorage.setItem('meu_treino_rascunho_v1',JSON.stringify({date:'2026-10-15',day:'C',exercises:[{name:'Rosca direta polia + tríceps pulley',done:true,load:'20',reps:'12,12'}],cardioActivities:[],notes:''}));
+      });
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
+      check(await page.locator('.exercise').count()===1 && (await page.locator('.exercise').innerText()).includes('2 séries × 12 cada'), 'pre-update draft retains its original exercise and legacy prescription');
+      await page.evaluate(() => {localStorage.clear();});
+      await page.reload();
+      await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
       await page.locator('.done').first().check();
       await page.locator('.load').first().fill('25');
       await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
       await page.locator('.cardio-minutes').fill('20');
       await page.locator('.cardio-speed').fill('5.5');
       await page.locator('.cardio-incline').fill('2');
+      await page.locator('.cardio-distance').fill('1.8');
+      await page.locator('.cardio-calories').fill('-1');
+      await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
+      check(await page.locator('#cardioError').isVisible() && await page.evaluate(() => JSON.parse(localStorage.getItem('meu_treino_historico_v2')||'{"workouts":[]}').workouts.length===0), 'invalid calories block save without writing a workout');
+      await page.locator('.cardio-calories').fill('150');
+      await page.locator('.cardio-distance').fill('-1');
+      await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
+      check(await page.locator('.cardio-distance').evaluate(input=>input.classList.contains('input-error')), 'negative cardio distance is rejected');
+      await page.locator('.cardio-distance').fill('1.8');
       await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
+      await page.locator('.cardio-distance').nth(1).fill('5');
+      await page.locator('.cardio-calories').nth(1).fill('90');
       await page.locator('.cardio-type').nth(1).selectOption('Bicicleta');
+      check(await page.locator('.cardio-distance').nth(1).inputValue()==='5' && await page.locator('.cardio-calories').nth(1).inputValue()==='90', 'changing cardio machine retains distance and calories');
       await page.locator('.cardio-minutes').nth(1).fill('15');
       await page.getByRole('button', {name: '+ Adicionar', exact: true}).click();
       await page.locator('.cardio-type').nth(2).selectOption('Escada');
       await page.locator('.cardio-minutes').nth(2).fill('10');
+      check(await page.locator('.cardio-distance').nth(2).isVisible() && await page.locator('.cardio-calories').nth(2).isVisible(), 'stair cardio supports optional distance and calories');
       await page.locator('.remove-cardio').nth(2).click();
       check(await page.locator('.cardio-item').count() === 2, 'multiple cardio entries can be added and removed');
       await page.reload();
@@ -89,6 +162,7 @@ try {
       check(await page.locator('#draftBanner').isVisible() && await page.locator('.done').first().isChecked(), 'active draft is identified and restored intentionally');
       check(await page.locator('.cardio-minutes').first().inputValue() === '20', 'cardio draft survives reload');
       check(await page.locator('.cardio-item').count() === 2, 'multiple cardio entries survive reload');
+      check(await page.locator('.cardio-distance').first().inputValue()==='1.8' && await page.locator('.cardio-calories').first().inputValue()==='150', 'cardio distance and calories survive draft reload');
       await page.getByRole('button', {name: 'Finalizar e salvar treino', exact: true}).click();
       check(await page.locator('.done:checked').count() === 0, 'saving starts a clean unchecked session');
       check(!(await page.locator('#draftBanner').isVisible()), 'saving clears the active draft');
@@ -98,22 +172,75 @@ try {
       const todayText = await page.locator('#todayWorkout').innerText();
       check(await page.locator('#todayWorkout').isVisible() && todayText.includes('Treino de hoje — salvo'), 'today summary returns when the app reopens');
       check(todayText.includes('25 kg') && todayText.includes('Esteira: 20 min') && todayText.includes('Bicicleta: 15 min'), 'today summary restores exercises and cardio values');
+      check(todayText.includes('1.8 km • 150 kcal') && todayText.includes('5 km • 90 kcal'), 'saved summary displays distance and calories per activity');
+      const beforeHealth=await page.evaluate(()=>localStorage.getItem('meu_treino_historico_v2'));
+      await page.locator('#todayWorkout').getByRole('button',{name:'Enviar ao Saúde',exact:true}).click();
+      await page.locator('#healthDialog').waitFor({state:'visible'});
+      check(await page.locator('#healthMinutes').inputValue()==='' && await page.locator('#healthTime').inputValue()==='', 'health handoff requires actual strength duration and start time without assuming 90 minutes');
+      check(await page.locator('#healthActivity option').count()===3, 'health handoff separates strength and each cardio activity');
+      await page.locator('#healthTime').fill('06:00');
+      await page.locator('#healthMinutes').fill('40');
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      check(!(await page.locator('#healthLaunch').isVisible()), 'health link cannot be prepared without duplicate check confirmation');
+      await page.locator('#healthConfirmed').check();
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      const strengthUrl=new URL(await page.locator('#healthLaunch').getAttribute('href'));
+      const strengthPayload=JSON.parse(strengthUrl.searchParams.get('text'));
+      check(strengthUrl.protocol==='shortcuts:' && strengthUrl.searchParams.get('name')==='Meu Treino Saúde' && strengthPayload.durationMinutes===40 && !Object.hasOwn(strengthPayload,'caloriesKcal'), 'health link uses encoded shortcut text and actual strength duration with no invented energy');
+      if(process.env.SCREENSHOT_DIR){
+        await mkdir(process.env.SCREENSHOT_DIR,{recursive:true});
+        await page.screenshot({path:path.join(process.env.SCREENSHOT_DIR,'saude-mobile.png')});
+      }
+      await page.locator('#healthActivity').selectOption('cardio-0');
+      check(await page.locator('#healthMinutes').inputValue()==='20' && await page.locator('#healthDistance').inputValue()==='1.8' && await page.locator('#healthCalories').inputValue()==='150' && await page.locator('#healthTime').inputValue()==='', 'health cardio preloads actual recorded metrics but requires its own start time');
+      check(!(await page.locator('#healthLaunch').isVisible()), 'changing activity invalidates the previously prepared health link');
+      await page.locator('#healthTime').fill('07:00');
+      await page.locator('#healthConfirmed').check();
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      const cardioPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
+      check(cardioPayload.activityType==='Caminhada' && cardioPayload.durationMinutes===20 && cardioPayload.distanceKm===1.8 && cardioPayload.caloriesKcal===150, 'cardio handoff includes distance in km and user-reviewed energy in kcal');
+      await page.locator('#healthDistance').fill('0');
+      await page.locator('#healthCalories').fill('0');
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      const zeroPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
+      check(zeroPayload.distanceKm===0 && zeroPayload.caloriesKcal===0, 'health handoff preserves explicit zero optional values');
+      await page.locator('#healthDistance').fill('');
+      await page.locator('#healthCalories').fill('');
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      const blankPayload=JSON.parse(new URL(await page.locator('#healthLaunch').getAttribute('href')).searchParams.get('text'));
+      check(!Object.hasOwn(blankPayload,'distanceKm') && !Object.hasOwn(blankPayload,'caloriesKcal'), 'health handoff omits blank metrics instead of recording zeros');
+      await page.locator('#healthDate').fill('2099-01-01');
+      await page.getByRole('button',{name:'Revisar envio',exact:true}).click();
+      check((await page.locator('#healthStatus').innerText()).includes('terminado') && !(await page.locator('#healthLaunch').isVisible()), 'health handoff rejects future activities');
+      check(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth && document.getElementById('healthDialog').scrollWidth<=document.getElementById('healthDialog').clientWidth), 'health dialog fits mobile viewport without horizontal overflow');
+      const guideResponse=await page.request.get(url+'/saude-iphone.txt');
+      check(guideResponse.ok() && (await guideResponse.text()).includes('Registrar Treino'), 'shortcut setup guide is served with the application');
+      await page.locator('#healthDialog').getByRole('button',{name:'Fechar',exact:true}).click();
+      check(await page.evaluate(()=>localStorage.getItem('meu_treino_historico_v2'))===beforeHealth, 'health preparation never rewrites workout history');
       check(await page.locator('.done:checked').count() === 0, 'reopened app keeps the new session unchecked');
       await page.getByRole('button', {name: 'Editar', exact: true}).click();
       check(await page.locator('#editBanner').isVisible() && await page.getByRole('button', {name: 'Salvar alterações', exact: true}).isVisible(), 'edit action clearly identifies saved-workout editing mode');
       check(await page.locator('.done').first().isChecked() && await page.locator('.load').first().inputValue() === '25', 'editing loads saved completion and exercise values');
       await page.locator('.load').first().fill('27.5');
       await page.locator('.reps').first().fill('10,10,10');
+      await page.locator('.cardio-distance').first().fill('2.1');
+      await page.locator('.cardio-calories').first().fill('160');
       await page.reload();
       await page.waitForFunction(() => !!document.getElementById('exportChatGPT'));
       check(await page.locator('#editBanner').isVisible() && await page.locator('.load').first().inputValue() === '27.5', 'saved-workout edit survives reload as an identified draft');
       await page.getByRole('button', {name: 'Salvar alterações', exact: true}).click();
       const updatedTodayText = await page.locator('#todayWorkout').innerText();
       check(updatedTodayText.includes('27.5 kg') && updatedTodayText.includes('10,10,10 reps'), 'saving edits refreshes today summary values');
+      check(updatedTodayText.includes('2.1 km • 160 kcal'), 'distance and calories survive editing and reload');
       check(await page.evaluate(() => JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.length === 1), 'editing updates the existing workout without creating a duplicate');
       await page.getByRole('button', {name: 'Histórico', exact: true}).click();
       check((await page.locator('#historyList').innerText()).includes('Esteira: 20 min • 5.5 km/h • 2% inclinação'), 'history shows structured treadmill details');
       check((await page.locator('#historyList').innerText()).includes('Bicicleta: 15 min'), 'history shows each cardio activity separately');
+      check((await page.locator('#historyList').innerText()).includes('2.1 km • 160 kcal'), 'history shows entered cardio distance and calories');
+      await page.locator('#historyList').getByRole('button',{name:'Enviar ao Saúde',exact:true}).click();
+      await page.locator('#healthDialog').waitFor({state:'visible'});
+      check(await page.locator('#healthActivity option').count()===3, 'saved history also exposes the health handoff');
+      await page.locator('#healthDialog').getByRole('button',{name:'Fechar',exact:true}).click();
       check(await page.locator('#historyList').getByRole('button', {name: 'Editar', exact: true}).isVisible(), 'saved workouts can also be edited from history');
       if (process.env.SCREENSHOT_DIR) {
         await mkdir(process.env.SCREENSHOT_DIR, {recursive: true});

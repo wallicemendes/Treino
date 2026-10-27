@@ -1,0 +1,106 @@
+MEU TREINO → SAÚDE DO IPHONE
+Configuração inicial do Atalho — 27/10/2026
+
+O botão do Meu Treino abre um Atalho instalado no seu iPhone.
+O site não grava diretamente no Saúde. Este pacote contém o botão,
+o formato dos dados e este roteiro; não instala o Atalho no aparelho.
+Os nomes das ações podem variar conforme o idioma/versão do iOS.
+
+CRIAR O ATALHO UMA VEZ
+
+1. No iPhone, abra Atalhos, toque em + e use o nome:
+   Meu Treino Saúde
+   Se preferir outro nome, informe o mesmo nome no formulário do Meu Treino.
+
+2. Adicione "Obter Dicionário da Entrada" / Get Dictionary from Input.
+   Use "Entrada do Atalho" como entrada. O botão envia texto JSON.
+   Defina uma variável "Dados" com esse dicionário para reutilizá-lo.
+
+3. Use "Obter Valor do Dicionário" sobre Dados para obter estas chaves,
+   guardando cada resultado em uma variável com o mesmo nome:
+   activityType, startDate, durationMinutes.
+   Também obtenha distanceKm e caloriesKcal quando presentes.
+   Nunca substitua ausência de distância ou calorias por zero.
+
+4. Converta startDate em data com a ação de obter datas da entrada.
+   A string é ISO 8601 com fuso UTC: use a data interpretada pelo Atalhos,
+   que será exibida no horário local. Não remova o Z nem altere o fuso.
+
+5. Adicione "Mostrar Alerta" com botão Cancelar habilitado.
+   Mostre activityType, início, durationMinutes e, quando existirem,
+   distanceKm e caloriesKcal. Inclua:
+   "Confirmar registro? Confira no Saúde se esta atividade já foi registrada."
+   Cancelar deve encerrar o Atalho antes de qualquer registro.
+
+6. Adicione a ação Saúde "Registrar Treino" / Log Workout:
+   - Tipo de treino: selecione "Perguntar Sempre".
+     Na execução, escolha o tipo correspondente a activityType
+     (por exemplo, treinamento de força tradicional, caminhada, corrida,
+     ciclismo, escada ou outro). O texto do Meu Treino é uma referência,
+     não um identificador interno de atividade do iOS.
+   - Início: variável com a data convertida na etapa 4.
+   - Duração: durationMinutes, com unidade MINUTOS.
+
+7. Distância e calorias são opcionais:
+   Na configuração básica, deixe esses campos sem valor na ação.
+   Assim, início/duração/tipo são registrados sem inventar métricas.
+   Para também gravar as métricas opcionais automaticamente, use ações
+   "Se" verificando se Dados contém as chaves distanceKm e caloriesKcal:
+   - Ambas presentes: Registrar Treino com distância em KM e energia em KCAL.
+   - Só distanceKm: Registrar Treino com distância em KM; sem energia.
+   - Só caloriesKcal: Registrar Treino com energia em KCAL; sem distância.
+   - Nenhuma: Registrar Treino sem distância e sem energia.
+   Configure as quatro variantes dentro dos respectivos ramos, para que
+   apenas UMA ação Registrar Treino seja executada por abertura.
+   Preserve zero explícito: teste a existência da chave, não se o valor > 0.
+   Use os mesmos início/duração e Tipo "Perguntar Sempre" em cada variante.
+   Não adicione ações separadas para gravar energia ativa ou distância:
+   isso pode contabilizar os mesmos dados mais de uma vez.
+
+8. Na primeira execução, autorize o acesso solicitado pelo Atalhos ao Saúde.
+   Depois do teste, confirme no Saúde os valores efetivamente gravados.
+   A criação do Atalho e a gravação em um iPhone real ainda precisam ser
+   verificadas no seu aparelho. O navegador não confirma esse resultado.
+
+USAR NO MEU TREINO
+
+1. Salve o treino. No resumo do dia ou no Histórico, toque "Enviar ao Saúde".
+2. Selecione musculação ou um dos cardios registrados.
+3. Confira o tipo: esteira pode ser caminhada OU corrida.
+4. Informe data e horário reais de início daquela atividade.
+5. Musculação exige duração real informada manualmente.
+   No cardio, a duração, distância e calorias registradas aparecem para revisão.
+   Não envie os 90 minutos planejados como tempo efetivamente realizado.
+6. Confira se as calorias são ATIVAS, não totais. Se não souber, deixe vazio.
+7. Confirme que a atividade ainda não existe no Saúde/Apple Watch.
+8. Toque "Revisar envio" e confira o resumo; toque "Abrir Atalho e confirmar".
+9. Confirme o alerta e o tipo no Atalho. Ao voltar, verifique o Saúde.
+   Para outra atividade da sessão, repita com o horário próprio dela.
+   Não envie novamente uma atividade já gravada.
+
+PRIVACIDADE E LIMITES
+
+O texto enviado contém somente tipo, início/fim, duração e métricas opcionais.
+Não contém UID, e-mail, notas, cargas, exercícios detalhados ou credenciais.
+O envio não altera o registro no Firestore nem o marca como sincronizado.
+Somente o nome preferido do Atalho é salvo neste navegador.
+O link usa o esquema shortcuts:// e funciona quando aberto no iPhone com
+o Atalho instalado; em um computador ele pode não abrir.
+Não há promessa de atualização de anéis ou de exibição de todos os detalhes
+no Fitness: confirme os dados no Saúde após a primeira execução.
+Registros antigos sem início/duração comprovados exigem sua confirmação.
+
+FORMATO DE ENTRADA (EXEMPLO FICTÍCIO)
+
+{"schemaVersion":1,"source":"Meu Treino","activityType":"Caminhada","startDate":"2026-10-15T12:00:00.000Z","endDate":"2026-10-15T12:20:00.000Z","durationMinutes":20,"distanceKm":1.8,"caloriesKcal":150}
+
+As propriedades distanceKm e caloriesKcal não existem no JSON se deixadas vazias.
+Não confunda duração em minutos com segundos; distância usa km, energia kcal.
+
+REFERÊNCIAS OFICIAIS
+
+Executar Atalho por URL e passar texto:
+https://support.apple.com/en-ae/guide/shortcuts/apd624386f42/ios
+
+Ações de compartilhamento e Registrar Treino:
+https://support.apple.com/en-mide/guide/shortcuts/apdaf74d75a5/ios
