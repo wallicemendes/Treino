@@ -1,38 +1,14 @@
 # Meu Treino — registro, análise local e exportação
 
-## Fichas Upper/Lower com bi-sets — 27/10/2026
+## Ficha de quatro dias — 08/11/2026
 
-Novas sessões usam a versão `upper-lower-5dias-maquina-livre-v2-2026-10`. Segunda A, quarta C e sexta E treinam superiores; terça B e quinta D, inferiores. Sábado e domingo são dias de recuperação. A/B/D/E têm oito exercícios, C tem nove. Em TODOS os bi-sets, o primeiro exercício usa máquina ou polia e o segundo usa apenas halteres ou peso corporal. Não há pares de duas máquinas nem pares de dois exercícios livres nas fichas novas. Os bi-sets têm duas rodadas; o volume foi ajustado para acomodar os acréscimos. Reserve 5 min para aquecimento, até aproximadamente 60 min para musculação (incluindo aproximação e transições) e 25 min para cardio moderado. Encerre os acessórios ao atingir 60 min, registrando apenas o realizado.
+Novas sessões usam `upper-lower-4dias-sem-bisets-v3-2026-11`: segunda A superior, terça B inferior, quinta C superior e sexta D inferior. Quarta e fim de semana são recuperação. Todos os exercícios de A–D usam séries separadas. A, C e D têm sete exercícios; B tem seis.
 
-| Dia | Séries separadas, nesta ordem | Bi-sets de acessórios, nesta ordem |
-| --- | --- | --- |
-| A | Supino máquina 3×10–12; Puxada articulada 3×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Elevação lateral com halteres 10–15; 2 rodadas: Rosca direta polia 10–15 + Tríceps francês com halter 10–15 |
-| B | Leg Press 45° 3×10–12; Cadeira flexora 3×10–12 | 2 rodadas: Cadeira extensora 12–15 + Prancha solo 20–40 s; 2 rodadas: Cadeira abdutora 12–15 + Abdominal dead bug 8–10 por lado; 2 rodadas: Panturrilha em pé 15–20 + Prancha lateral 20–30 s por lado |
-| C | Supino inclinado articulado 3×10–12; Puxada triângulo 3×10–12; Remada máquina neutra 2×10–12 | 2 rodadas: Crucifixo máquina 12–15 + Crucifixo inverso com halteres 12–15; 2 rodadas: Rosca direta polia 10–15 + Elevação lateral com halteres 10–15; 2 rodadas: Tríceps pulley 10–15 + Rosca alternada com halteres 10–12 por lado |
-| D | Agachamento Hack 3×10–12; Leg Press 45° 3×10–12; Mesa flexora 3×10–12; ao final Bird dog 2×8–10 por lado | 2 rodadas: Cadeira adutora 12–15 + Prancha lateral 20–30 s por lado; 2 rodadas: Panturrilha no Leg Press 15–20 + Abdominal curto solo 15–20 |
-| E | Supino máquina 2×10–12; Puxada articulada 2×10–12; Remada máquina neutra 2×10–12; Desenvolvimento máquina 2×10–12 | 2 rodadas: Tríceps corda 10–15 + Rosca martelo 10–15; 2 rodadas: Crucifixo máquina 12–15 + Crucifixo inverso com halteres 12–15 |
+Reserve 5 min de aquecimento, 50–55 min de musculação e 30–35 min de cardio (55 + 30 ou 50 + 35). O guia apresenta descanso e progressão gradual com repetições em reserva, sem garantia de emagrecimento rápido.
 
-Descanse 90–120 s nos compostos (até 180 s quando necessário), 60–90 s nos acessórios separados e 90–120 s após cada par. Entre os exercícios do bi-set, use o tempo de troca, cerca de 15–30 s. Se a técnica, as repetições ou o fôlego piorarem, aumente o descanso. Se os aparelhos estiverem ocupados, faça séries separadas.
+Registros e rascunhos anteriores preservam nomes, séries, metas, bi-sets e versão original. E permanece disponível somente para compatibilidade histórica. A edição mantém o registro original, inclusive campos adicionais. As chaves locais e a integração Firestore permanecem iguais; abrir a ficha não migra registros.
 
-Na tela, cada bi-set é um bloco com **PRIMEIRO exercício** e **SEGUNDO exercício** e registros independentes. Faça uma série de cada, descanse e repita a rodada. Os parceiros livres têm dicas de equipamento e execução; nomes históricos não são renomeados. Comece com 2–3 repetições em reserva. A combinação extensora + agachamento foi retirada da ficha nova para reduzir sobreposição local: extensora agora é pareada com prancha. Metas “cada lado” não devem ser somadas nem tratadas como repetições bilaterais pela análise. Exercícios por tempo têm rótulo próprio em segundos.
-
-Rascunhos existentes mantêm a ficha e a versão em que foram iniciados. O app avisa quando o rascunho é anterior: salve-o ou descarte-o conscientemente para iniciar a nova ficha. A atualização não troca os exercícios dentro de registros salvos.
-
-As cargas anteriores são consultadas pelo nome exato e pela data mais recente até a data da sessão, sem preencher os campos da nova sessão. Comece a adaptação com 2–3 repetições em reserva. Atingir o topo da faixa em todas as séries, com técnica e 1–2 repetições em reserva em duas sessões, permite tentar o menor incremento disponível (~2–5%). Reduza um incremento se ficar abaixo da faixa. Para prancha, progrida a duração até 40 s. Cargas de exercícios sem registro precisam ser calibradas; a carga do antigo exercício combinado de braços não é transferida aos dois exercícios novos.
-
-Pesquisa revisada em 27/10/2026: [Jeff Nippard](https://www.youtube.com/watch?v=McXybGnPFvg) apresenta supersets separados como ferramenta de economia de tempo; [Menno Henselmans](https://mennohenselmans.com/this-is-the-most-time-efficient-training-technique/) destaca pouca sobreposição muscular, recuperação do fôlego e logística; [Eric Helms, em demonstração no canal oficial RP](https://www.youtube.com/watch?v=Rqla2dZslfo), mostra pares de puxar/empurrar e progressão. São princípios de organização, não fichas desses profissionais copiadas para o usuário.
-
-A [meta-análise de 2025](https://doi.org/10.1007/s40279-025-02176-8), com 19 estudos e 313 participantes, encontrou economia de tempo e adaptações semelhantes em média, com maior esforço percebido; pares de movimentos semelhantes comprometeram mais a carga-volume. Não há justificativa para prometer mais hipertrofia apenas por usar bi-set. Os pares acima são uma adaptação prática à exigência máquina/polia + halteres/solo, mantendo compostos primeiro e cargas individuais. Duração e resposta individual variam.
-
-### Compatibilidade e dados
-
-A suíte verifica pares máquina/polia + exercício livre em A–E, preservação de registros e rascunhos antigos, cardio, exportação e análise. A integração com Saúde/Atalhos e a estimativa de calorias da musculação foram removidas. O app não envia dados ao Saúde. Firebase autenticado é simulado nos testes; dados de produção não são alterados.
-
-Não há migração nem escrita no Firestore ao abrir as novas fichas. Nomes existentes permanecem idênticos. O exercício histórico `Rosca direta polia + tríceps pulley` continua nos registros e gráficos; somente novas sessões C passam a registrar os dois braços separadamente.
-
-Editar um registro usa os exercícios, séries e metas daquele registro, inclusive após recarregar o rascunho, preservando campos adicionais. O seletor de dia fica bloqueado durante a edição. Novas sessões acrescentam registros. Rascunhos anteriores à atualização mantêm os exercícios e usam as prescrições antigas quando séries e metas ainda não estavam no rascunho.
-
-Novos registros adicionam `planVersion` e os exercícios pareados adicionam `biset` (identificador local à sessão). A exportação schemaVersion 2 aceita esses campos opcionais e mantém os campos existentes; a análise continua agrupando pelo nome exato. Não publique exportações pessoais no repositório.
+A suíte verifica fichas A–D, calendário, edição histórica, rascunhos, cardio, exportação e análise. Firebase autenticado é simulado; testes não alteram dados de produção.
 
 ## Sessão atual e cardio
 

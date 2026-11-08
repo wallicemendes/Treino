@@ -70,24 +70,15 @@ try {
     check(await page.locator('.done:checked').count() === 0, `${width}px: new session starts with every exercise unchecked`);
     check(!(await page.locator('#account').isVisible()) && !(await page.locator('#cloudTools').isVisible()), `${width}px: cloud controls stay off the training screen`);
     if (width === 390) {
-      for (const [day, count, pairs] of [['A',8,2],['B',8,3],['C',9,3],['D',8,2],['E',8,2]]) {
+      for (const [day,count] of [['A',7],['B',6],['C',7],['D',7]]) {
         await page.locator('#day').selectOption(day);
-        check(await page.locator('.exercise').count() === count && await page.locator('.biset-label').count() === pairs, day + ': complete plan and explicit paired accessory labels');
-        check(await page.locator('.biset-group').evaluateAll(groups=>groups.every(group=>group.querySelectorAll('.exercise').length===2 && group.textContent.includes('Uma série de cada'))), day+': each bi-set is one group with two separately recorded exercises and explicit execution order');
-        if(day==='B'){
-          const pairs=await page.locator('.biset-group').allTextContents();
-          check(pairs[0].includes('Cadeira extensora')&&pairs[0].includes('Prancha solo')&&pairs[1].includes('Cadeira abdutora')&&pairs[1].includes('Abdominal dead bug'), 'B pairs each machine with separate core work instead of another machine or quadriceps exercise');
-        }
-        if (day === 'D') {
-          const names=await page.locator('.exercise-title').allTextContents();
-          assert.equal(names.includes('Elevação pélvica máquina'),false);
-          assert.equal(names[1],'Leg Press 45°');
-        }
+        check(await page.locator('.exercise').count()===count && await page.locator('.biset-group').count()===0,day+': independent exercises');
       }
-      check((await page.locator('#planGuide').innerText()).includes('25 min'), 'session guide includes cardio and progression');
-      for (const [date,day] of [['2026-10-19','A'],['2026-10-20','B'],['2026-10-21','C'],['2026-10-22','D'],['2026-10-23','E']]) {
+      check(await page.locator('#day option[value="E"]').isDisabled(),'E unavailable for new sessions');
+      check((await page.locator('#planGuide').innerText()).includes('30–35'),'guide includes updated cardio');
+      for(const [date,day] of [['2026-10-19','A'],['2026-10-20','B'],['2026-10-21','A'],['2026-10-22','C'],['2026-10-23','D']]){
         await page.clock.setFixedTime(new Date(date+'T12:00:00Z'));
-        check(await page.evaluate(() => suggestedDay())===day, date+': weekday maps to '+day);
+        check(await page.evaluate(()=>suggestedDay())===day,date+': suggested day '+day);
       }
       await page.clock.setFixedTime(new Date('2026-10-15T12:00:00Z'));
       check(await page.evaluate(() => {
@@ -116,15 +107,17 @@ try {
       await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
       check(await page.evaluate(record => {
         const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
-        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-5dias-maquina-livre-v2-2026-10' && records[1].exercises.length===9 && records[1].exercises.filter(item=>item.biset).length===6;
-      },legacy), 'new C appends with separate arms and bi-set metadata without overwriting legacy');
-      await page.locator('#day').selectOption('E');
-      await page.locator('.done').first().check();
-      await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
-      check(await page.evaluate(() => {
-        const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
-        return records.length===3 && records[2].day==='E' && records[2].exercises.length===8 && records[2].exercises.every(item=>item.sets===2);
-      }), 'fifth training day saves independently with adjusted volume');
+        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-4dias-sem-bisets-v3-2026-11' && records[1].exercises.length===7 && records[1].exercises.filter(item=>item.biset).length===0;
+      },legacy), 'new C appends with separate arms and no bi-sets without overwriting legacy');
+      await page.evaluate(()=>{
+        const record={id:'legacy-e',date:'2026-10-09',day:'E',planVersion:'old',exercises:[{name:'Rosca martelo',sets:2,target:'10–15',biset:'1',done:true,load:'5',reps:'12,12'}],cardio:0,notes:''};
+        db.workouts.push(record);persist();editWorkout('legacy-e');
+      });
+      await page.reload();
+      await page.waitForFunction(()=>!!document.getElementById('exportChatGPT'));
+      check(await page.locator('#day').inputValue()==='E' && await page.locator('.exercise').count()===1,'legacy E edit draft restores');
+      await page.getByRole('button',{name:'Salvar alterações',exact:true}).click();
+      check(await page.locator('#day option[value="E"]').isDisabled(),'saving legacy E returns to active calendar');
       await page.evaluate(()=>{
         const names=['Leg Press 45°','Cadeira flexora','Cadeira extensora','Cadeira abdutora','Panturrilha em pé','Prancha solo'];
         localStorage.setItem('meu_treino_rascunho_v1',JSON.stringify({date:'2026-10-15',day:'B',planVersion:'upper-lower-5dias-biset-2026-10',exercises:names.map((name,index)=>({name,sets:3,target:name==='Prancha solo'?'20–40 s':'12–15',done:index===0,load:'',reps:''})),cardioActivities:[],notes:''}));
