@@ -20,7 +20,9 @@ test('four active plans use independent exercises and prescribed volume',()=>{
     assert.ok(plans[day].every(item=>!item[3]));
   }
   assert.equal(plans.B.at(-1)[2],'30–45 s');
-  assert.equal(plans.D[2][0],'Elevação pélvica máquina');
+  assert.deepEqual(plans.D[2],['Stiff com halteres',3,'10–12']);
+  assert.deepEqual(plans.D[6],['Cadeira abdutora',3,'12–15']);
+  assert.equal(new Set(plans.D.map(item=>item[0])).size,7);
 });
 
 test('new free partners have execution guidance and no invented starting load',()=>{
