@@ -1,14 +1,70 @@
 # Meu Treino — registro, análise local e exportação
 
-## Ficha de quatro dias — 08/11/2026
+## Full Body de quatro dias — 22/11/2026
 
-Novas sessões usam `upper-lower-4dias-sem-bisets-v3-2026-11`: segunda A superior, terça B inferior, quinta C superior e sexta D inferior. Quarta e fim de semana são recuperação. Todos os exercícios de A–D usam séries separadas. A, C e D têm sete exercícios; B tem seis.
+Novas sessões usam `full-body-4dias-v4-2026-11-22`: segunda A Full Body Força, terça B Full Body Moderado, quinta C Full Body Força e sexta D Full Body Leve. Quarta e fim de semana são recuperação. Todos os exercícios de A–D usam séries separadas, sem superséries. São oito exercícios por sessão, com 19 séries em A/B/C e 16 em D.
 
 Reserve 5 min de aquecimento, 50–55 min de musculação e 30–35 min de cardio (55 + 30 ou 50 + 35). O guia apresenta descanso e progressão gradual com repetições em reserva, sem garantia de emagrecimento rápido.
 
 Registros e rascunhos anteriores preservam nomes, séries, metas, bi-sets e versão original. E permanece disponível somente para compatibilidade histórica. A edição mantém o registro original, inclusive campos adicionais. As chaves locais e a integração Firestore permanecem iguais; abrir a ficha não migra registros.
 
 A suíte verifica fichas A–D, calendário, edição histórica, rascunhos, cardio, exportação e análise. Firebase autenticado é simulado; testes não alteram dados de produção.
+
+### Ficha A
+
+| Exercício | Séries | Meta |
+|---|---|---|
+| Leg Press 45° | 3 | 8–10 |
+| Supino máquina | 3 | 8–10 |
+| Puxada articulada | 3 | 8–10 |
+| Cadeira flexora | 2 | 10–12 |
+| Desenvolvimento máquina | 2 | 10–12 |
+| Rosca martelo | 2 | 10–12 |
+| Tríceps corda | 2 | 10–12 |
+| Panturrilha em pé | 2 | 12–15 |
+
+### Ficha B
+
+| Exercício | Séries | Meta |
+|---|---|---|
+| Agachamento Hack | 3 | 10–12 |
+| Supino inclinado articulado | 3 | 10–12 |
+| Remada máquina neutra | 3 | 10–12 |
+| Mesa flexora | 2 | 12–15 |
+| Elevação lateral | 2 | 12–15 |
+| Rosca direta polia | 2 | 12–15 |
+| Tríceps pulley | 2 | 12–15 |
+| Prancha solo | 2 | 30–40 s |
+
+### Ficha C
+
+| Exercício | Séries | Meta |
+|---|---|---|
+| Leg Press 45° | 3 | 8–10 |
+| Supino inclinado articulado | 3 | 8–10 |
+| Puxada triângulo | 3 | 8–10 |
+| Cadeira flexora | 2 | 10–12 |
+| Desenvolvimento máquina | 2 | 10–12 |
+| Rosca martelo | 2 | 10–12 |
+| Tríceps corda | 2 | 10–12 |
+| Panturrilha no Leg Press | 2 | 15–20 |
+
+### Ficha D
+
+| Exercício | Séries | Meta |
+|---|---|---|
+| Cadeira extensora | 2 | 12–15 |
+| Crucifixo máquina | 2 | 12–15 |
+| Remada máquina neutra | 2 | 12–15 |
+| Mesa flexora | 2 | 12–15 |
+| Elevação lateral | 2 | 12–15 |
+| Rosca direta polia | 2 | 12–15 |
+| Tríceps pulley | 2 | 12–15 |
+| Panturrilha em pé | 2 | 15–20 |
+
+Cardio: A esteira 30 min; B bicicleta 30 min; C esteira 30 min alternando caminhada moderada e rápida; D bicicleta ou esteira 30–35 min. Intensidade moderada, em ritmo que permita conversar. Cargas: A/C com 2–3 repetições em reserva, B com 3 e D com 3–4. Ajuste com um profissional conforme recuperação e técnica, especialmente nos dias consecutivos.
+
+Referência geral: [ACSM 2026](https://acsm.org/resistance-training-guidelines-update-2026/). O planejamento solicitado não é uma prescrição individual baseada em avaliação física.
 
 ## Sessão atual e cardio
 

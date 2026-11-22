@@ -70,7 +70,7 @@ try {
     check(await page.locator('.done:checked').count() === 0, `${width}px: new session starts with every exercise unchecked`);
     check(!(await page.locator('#account').isVisible()) && !(await page.locator('#cloudTools').isVisible()), `${width}px: cloud controls stay off the training screen`);
     if (width === 390) {
-      for (const [day,count] of [['A',7],['B',6],['C',7],['D',7]]) {
+      for (const [day,count] of [['A',8],['B',8],['C',8],['D',8]]) {
         await page.locator('#day').selectOption(day);
         check(await page.locator('.exercise').count()===count && await page.locator('.biset-group').count()===0,day+': independent exercises');
       }
@@ -107,7 +107,7 @@ try {
       await page.getByRole('button', {name:'Finalizar e salvar treino',exact:true}).click();
       check(await page.evaluate(record => {
         const records=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts;
-        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='upper-lower-4dias-sem-bisets-v3-2026-11' && records[1].exercises.length===7 && records[1].exercises.filter(item=>item.biset).length===0;
+        return records.length===2 && JSON.stringify(records[0])===JSON.stringify(record) && records[1].planVersion==='full-body-4dias-v4-2026-11-22' && records[1].exercises.length===8 && records[1].exercises.filter(item=>item.biset).length===0;
       },legacy), 'new C appends with separate arms and no bi-sets without overwriting legacy');
       await page.evaluate(()=>{
         const record={id:'legacy-e',date:'2026-10-09',day:'E',planVersion:'old',exercises:[{name:'Rosca martelo',sets:2,target:'10–15',biset:'1',done:true,load:'5',reps:'12,12'}],cardio:0,notes:''};
@@ -129,6 +129,14 @@ try {
       check((await page.locator('#draftBanner').innerText()).includes('Ficha anterior'), 'old draft warning is visible outside the collapsed workout instructions');
       await page.getByRole('button',{name:'Finalizar e salvar treino',exact:true}).click();
       check(await page.evaluate(()=>{const saved=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.at(-1);return saved.planVersion==='upper-lower-5dias-biset-2026-10'&&saved.exercises.length===6;}), 'saving a pre-update draft retains its original plan version and exercise count');
+      const previousDraft={date:'2026-10-15',day:'D',planVersion:'upper-lower-4dias-sem-bisets-v3-2026-11',exercises:[{name:'Stiff com halteres',sets:3,target:'10–12',done:true,load:'12',reps:'10,10,10'},{name:'Cadeira abdutora',sets:3,target:'12–15',done:false,load:'20',reps:''}],cardioActivities:[],notes:'Manter rascunho'};
+      await page.evaluate(draft=>localStorage.setItem('meu_treino_rascunho_v1',JSON.stringify(draft)),previousDraft);
+      await page.reload();
+      await page.waitForFunction(()=>!!document.getElementById('exportChatGPT'));
+      check(await page.evaluate(draft=>JSON.stringify(JSON.parse(localStorage.getItem('meu_treino_rascunho_v1')))===JSON.stringify(draft),previousDraft),'previous four-day draft remains unchanged after opening Full Body');
+      check(await page.locator('.exercise').count()===2 && await page.locator('.load').first().inputValue()==='12','previous four-day draft displays original exercises and load');
+      await page.getByRole('button',{name:'Finalizar e salvar treino',exact:true}).click();
+      check(await page.evaluate(draft=>{const saved=JSON.parse(localStorage.getItem('meu_treino_historico_v2')).workouts.at(-1);return saved.planVersion===draft.planVersion&&JSON.stringify(saved.exercises)===JSON.stringify(draft.exercises);},previousDraft),'previous four-day draft saves original version and prescription');
       await page.evaluate(() => {
         localStorage.setItem('meu_treino_historico_v2',JSON.stringify({workouts:[],weights:[]}));
         localStorage.setItem('meu_treino_rascunho_v1',JSON.stringify({date:'2026-10-15',day:'C',exercises:[{name:'Rosca direta polia + tríceps pulley',done:true,load:'20',reps:'12,12'}],cardioActivities:[],notes:''}));
